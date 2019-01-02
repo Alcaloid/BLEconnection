@@ -4,6 +4,8 @@ import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import com.example.pink.bleconnection.BLEScanner.BluetoothReciveRSSIActivity
+import com.example.pink.bleconnection.Map.MapActivity
+import com.example.pink.bleconnection.Map.Maps2Activity
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {

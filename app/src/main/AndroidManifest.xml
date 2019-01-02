@@ -38,7 +38,7 @@
             android:name=".NotificationActivity"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".MapActivity"
+            android:name=".Map.MapActivity"
             android:screenOrientation="portrait" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
@@ -53,9 +53,10 @@
             android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".Maps2Activity"
+            android:name=".Map.Maps2Activity"
             android:label="@string/title_activity_maps2"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait" />
+        <activity android:name=".DemoAppActivity"></activity>
     </application>
 
 </manifest>

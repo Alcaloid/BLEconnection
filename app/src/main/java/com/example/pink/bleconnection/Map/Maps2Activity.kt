@@ -1,7 +1,8 @@
-package com.example.pink.bleconnection
+package com.example.pink.bleconnection.Map
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import com.example.pink.bleconnection.R
 
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap

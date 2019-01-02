@@ -1,16 +1,12 @@
-package com.example.pink.bleconnection
+package com.example.pink.bleconnection.Map
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
 import kotlinx.android.synthetic.main.activity_map.*
-import android.graphics.BitmapFactory
-import android.graphics.Canvas
 import android.widget.RelativeLayout
 import android.view.ViewGroup.MarginLayoutParams
-
-
-
+import com.example.pink.bleconnection.R
 
 
 class MapActivity : AppCompatActivity() {
