@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <Button
+        android:id="@+id/button_main"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="20dp"
+        android:text="Bluetooth" />
+
+    <Button
+        android:id="@+id/BLEbutton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginTop="60dp"
+        android:text="BLE" />
+
+    <Button
+        android:id="@+id/notiButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Noti" />
+
+    <Button
+        android:id="@+id/mapbutton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Map" />
+
+    <Button
+        android:id="@+id/googlemap_buttom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="GoogleMap" />
+</LinearLayout>
