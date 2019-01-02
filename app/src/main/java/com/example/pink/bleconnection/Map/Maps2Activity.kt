@@ -1,5 +1,13 @@
 package com.example.pink.bleconnection.Map
 
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothManager
+import android.bluetooth.le.BluetoothLeScanner
+import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanResult
+import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import com.example.pink.bleconnection.R
@@ -11,12 +19,23 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.LatLngBounds
-
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.GroundOverlayOptions
+import com.google.android.gms.maps.model.CameraPosition
 
 
 class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
+    lateinit var mBluetoothManager : BluetoothManager
+    lateinit var mBluetoothAdapter : BluetoothAdapter
+    lateinit var mScanner : BluetoothLeScanner
+    //0,1 is x,y and 3 is rssi and 4 is receive rssi
+    private var beacon0Information : IntArray = intArrayOf(0,0,0,0)
+    private var beacon1Information : IntArray = intArrayOf(40,0,0,0)
+    private var beacon2Information : IntArray = intArrayOf(0,40,0,0)
+    private var beacon3Information : IntArray = intArrayOf(40,40,0,0)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,7 +43,13 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
                 .findFragmentById(R.id.map) as SupportMapFragment
+        mBluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        mBluetoothAdapter = mBluetoothManager.adapter
+        mScanner = mBluetoothAdapter.bluetoothLeScanner
+//        beacon0Information[0] = 20
+//        println("array size : "+ beacon0Information.size + " position x,y : "+beacon0Information[0]+","+beacon0Information[1])
         mapFragment.getMapAsync(this)
+//        startScanner()
     }
 
     /**
@@ -38,19 +63,61 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
-        mMap.mapType = GoogleMap.MAP_TYPE_NORMAL
-        mMap.isIndoorEnabled = true
-        mMap.isTrafficEnabled = false
-
+        mMap.mapType = GoogleMap.MAP_TYPE_NONE
+        val testingRoom = LatLngBounds(
+                LatLng(0.0, 0.0),
+                LatLng(40.0,40.0))
+        val testingMap = GroundOverlayOptions()
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.seniortesting))
+                .positionFromBounds(testingRoom)
+        val location = LatLng(0.0,0.0)
+        val locationZoom = LatLng(20.0,20.0)
         val cameraTraget = LatLngBounds(
-                LatLng(13.6, 100.494201), LatLng(13.7, 100.494201))
-        // Add a marker in Sydney and move the camera
-        val sydney = LatLng(13.650051, 100.494201)
-        mMap.addMarker(MarkerOptions().position(sydney).title("Marker in KMUTT"))
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(sydney,20f))
+                LatLng(-0.01,-0.01), LatLng(40.0, 40.0))
+        mMap.addGroundOverlay(testingMap)
+        mMap.addMarker(MarkerOptions().position(location).title("Marker"))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationZoom,3f))
         mMap.setLatLngBoundsForCameraTarget(cameraTraget);
 
+        startScanner()
+//        mMap.setMinZoomPreference(10.0f) //zoomout
+//        mMap.setMaxZoomPreference(14.0f) // zoomin
+    }
 
+    private var leScanCallBack = object : ScanCallback(){
+        override fun onScanResult(callbackType: Int, result: ScanResult) {
+            super.onScanResult(callbackType, result)
+            if(result.device.name == "RL0"){
+                beacon0Information[2] = result.rssi
+                beacon0Information[3] = 1
+            }else if (result.device.name == "RL1"){
+                beacon1Information[2] = result.rssi
+                beacon1Information[3] = 1
+            }else if (result.device.name == "RL2"){
+                beacon2Information[2] = result.rssi
+                beacon2Information[3] = 1
+            }else if (result.device.name == "RL3"){
+                beacon3Information[2] = result.rssi
+                beacon3Information[3] = 1
+            }
+            if (beacon0Information[3]+beacon1Information[3]+beacon2Information[3]+beacon3Information[3]>=3){
+                calLocation(beacon0Information[2],beacon1Information[2],beacon2Information[2])
+            }
+        }
+    }
+    fun calLocation(rssi1:Int,rssi2: Int,rssi3: Int){
+
+//        mMap.addMarker(MarkerOptions().position(}).title("Marker"))
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        mScanner.stopScan(leScanCallBack)
+        beacon0Information[3] = 0
+        beacon1Information[3] = 0
+        beacon2Information[3] = 0
+        beacon3Information[3] = 0
+    }
+    fun startScanner(){
+        mScanner.startScan(leScanCallBack)
     }
 }

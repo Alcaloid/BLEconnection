@@ -28,8 +28,8 @@
                         </option>
                         <option name="values">
                           <map>
-                            <entry key="assetSourceType" value="FILE" />
-                            <entry key="outputName" value="ic_senior_testarea" />
+                            <entry key="color" value="0dff00" />
+                            <entry key="outputName" value="ic_location3" />
                             <entry key="sourceFile" value="D:\Titas P2\Year4\Senior\Blank Diagram.svg" />
                           </map>
                         </option>
