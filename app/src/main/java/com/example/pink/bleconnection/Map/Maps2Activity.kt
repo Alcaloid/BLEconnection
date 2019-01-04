@@ -28,7 +28,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     lateinit var mBluetoothAdapter : BluetoothAdapter
     lateinit var mScanner : BluetoothLeScanner
 
-    //0,1 is x,y and 2 is txpower and 3 is rssi and 4 is receive rssi and 5 is distance
+    //0,1 is x,y and 2 is txpower and 3 is distance from rssi and 4 is receive rssi and 5 is distance
     private var beaconInformation : Array<IntArray> = arrayOf(
             intArrayOf(0,0,-69,0,0,0), // beacon0
             intArrayOf(11,0,-74,0,0,0), // beacon1
@@ -89,21 +89,21 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
             if(result.device.name == "RL0"){
-                beaconInformation[0][3] = result.rssi
+                beaconInformation[0][3] = getDistance(result.rssi,beaconInformation[0][2]).toInt()
                 beaconInformation[0][4] = 1
             }else if (result.device.name == "RL1"){
-                beaconInformation[1][3] = result.rssi
+                beaconInformation[1][3] = getDistance(result.rssi,beaconInformation[1][2]).toInt()
                 beaconInformation[1][4] = 1
             }else if (result.device.name == "RL2"){
-                beaconInformation[2][3] = result.rssi
+                beaconInformation[2][3] = getDistance(result.rssi,beaconInformation[2][2]).toInt()
                 beaconInformation[2][4] = 1
             }else if (result.device.name == "RL3"){
-                beaconInformation[3][3] = result.rssi
+                beaconInformation[3][3] = getDistance(result.rssi,beaconInformation[3][2]).toInt()
                 beaconInformation[3][4] = 1
             }
             if (beaconInformation[0][4]+beaconInformation[1][4]+beaconInformation[2][4]+beaconInformation[3][4]>=3){
-                for (item in beaconInformation){
-                    println(item)
+                for(item in beaconInformation){
+
                 }
             }
         }
@@ -114,15 +114,20 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val distance : Double = Math.pow(10.0,((txPower-rssi)/(10.0*n)))
         return distance
     }
-    fun calLocation(distance1:Int, distance2:Int, distance3:Int){
-        val x1: Double = 1.0
-        val x2: Double = 1.0
-        val x3: Double = 1.0
-        val y3: Double = 1.0
-        val X : Double = ((distance1*distance1)-(distance2*distance2)+(x2*x2))/(2*x2)
-        val Y : Double = ((distance1*distance1)-(distance3*distance3)+(x3*x3)+(y3*y3)-(2*x3*x1))/(2*y3)
+    fun calLocation_V1(beacon1:Int, beacon2:Int, beacon3:Int){
+        val distance1 = beaconInformation[beacon1][3]
+        val distance2 = beaconInformation[beacon2][3]
+        val distance3 = beaconInformation[beacon3][3]
+
+        val x1 = beaconInformation[beacon1][0]
+        val x2 = beaconInformation[beacon2][0]
+        val x3 = beaconInformation[beacon3][0]
+        val y3 = beaconInformation[beacon3][1]
+
+        val X : Double = ((distance1*distance1)-(distance2*distance2)+(x2*x2))/(2*x2).toDouble()
+        val Y : Double = ((distance1*distance1)-(distance3*distance3)+(x3*x3)+(y3*y3)-(2*x3*x1))/(2*y3).toDouble()
         val myLocation : LatLng = LatLng(X,Y)
-        mMap.addMarker(MarkerOptions().position(myLocation).title("Marker"))
+        mMap.addMarker(MarkerOptions().position(myLocation).title("MyLocation"))
     }
     override fun onDestroy() {
         super.onDestroy()
