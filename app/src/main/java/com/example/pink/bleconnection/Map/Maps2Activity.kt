@@ -27,11 +27,15 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     lateinit var mBluetoothManager : BluetoothManager
     lateinit var mBluetoothAdapter : BluetoothAdapter
     lateinit var mScanner : BluetoothLeScanner
-    //0,1 is x,y and 3 is rssi and 4 is receive rssi
-    private var beacon0Information : IntArray = intArrayOf(0,0,0,0)
-    private var beacon1Information : IntArray = intArrayOf(11,0,0,0)
-    private var beacon2Information : IntArray = intArrayOf(0,15,0,0)
-    private var beacon3Information : IntArray = intArrayOf(11,15,0,0)
+
+    //0,1 is x,y and 2 is txpower and 3 is rssi and 4 is receive rssi and 5 is distance
+    private var beaconInformation : Array<IntArray> = arrayOf(
+            intArrayOf(0,0,-69,0,0,0), // beacon0
+            intArrayOf(11,0,-74,0,0,0), // beacon1
+            intArrayOf(0,15,-77,0,0,0), // beacon2
+            intArrayOf(11,15,-77,0,0,0)  // beacon3
+    )
+    var count : Int = 0
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,10 +47,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         mBluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = mBluetoothManager.adapter
         mScanner = mBluetoothAdapter.bluetoothLeScanner
-//        beacon0Information[0] = 20
-//        println("array size : "+ beacon0Information.size + " position x,y : "+beacon0Information[0]+","+beacon0Information[1])
         mapFragment.getMapAsync(this)
-//        startScanner()
     }
 
     /**
@@ -75,7 +76,10 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         mMap.addMarker(MarkerOptions().position(location).title("Marker"))
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationZoom,10f))
         mMap.setLatLngBoundsForCameraTarget(cameraTraget);
-
+        when{
+            mMap.cameraPosition.zoom > 15f -> mMap.animateCamera(CameraUpdateFactory.zoomTo(15f))
+            mMap.cameraPosition.zoom < 3f -> mMap.animateCamera(CameraUpdateFactory.zoomTo(3f))
+        }
         startScanner()
 //        mMap.setMinZoomPreference(10.0f) //zoomout
 //        mMap.setMaxZoomPreference(14.0f) // zoomin
@@ -85,21 +89,23 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
             if(result.device.name == "RL0"){
-                beacon0Information[2] = result.rssi
-                beacon0Information[3] = 1
+                beaconInformation[0][3] = result.rssi
+                beaconInformation[0][4] = 1
             }else if (result.device.name == "RL1"){
-                beacon1Information[2] = result.rssi
-                beacon1Information[3] = 1
+                beaconInformation[1][3] = result.rssi
+                beaconInformation[1][4] = 1
             }else if (result.device.name == "RL2"){
-                beacon2Information[2] = result.rssi
-                beacon2Information[3] = 1
+                beaconInformation[2][3] = result.rssi
+                beaconInformation[2][4] = 1
             }else if (result.device.name == "RL3"){
-                beacon3Information[2] = result.rssi
-                beacon3Information[3] = 1
+                beaconInformation[3][3] = result.rssi
+                beaconInformation[3][4] = 1
             }
-//            if (beacon0Information[3]+beacon1Information[3]+beacon2Information[3]+beacon3Information[3]>=3){
-//                calLocation(beacon0Information[2],beacon1Information[2],beacon2Information[2])
-//            }
+            if (beaconInformation[0][4]+beaconInformation[1][4]+beaconInformation[2][4]+beaconInformation[3][4]>=3){
+                for (item in beaconInformation){
+                    println(item)
+                }
+            }
         }
     }
     private fun getDistance(rssi: Int,txPower:Int):Double{
@@ -121,10 +127,10 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     override fun onDestroy() {
         super.onDestroy()
         mScanner.stopScan(leScanCallBack)
-        beacon0Information[3] = 0
-        beacon1Information[3] = 0
-        beacon2Information[3] = 0
-        beacon3Information[3] = 0
+        beaconInformation[0][4] = 0
+        beaconInformation[1][4] = 0
+        beaconInformation[2][4] = 0
+        beaconInformation[3][4] = 0
     }
     fun startScanner(){
         mScanner.startScan(leScanCallBack)
