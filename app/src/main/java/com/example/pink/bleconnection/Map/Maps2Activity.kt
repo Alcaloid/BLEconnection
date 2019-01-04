@@ -6,8 +6,6 @@ import android.bluetooth.le.BluetoothLeScanner
 import android.bluetooth.le.ScanCallback
 import android.bluetooth.le.ScanResult
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import com.example.pink.bleconnection.R
@@ -21,7 +19,6 @@ import com.google.android.gms.maps.model.MarkerOptions
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.GroundOverlayOptions
-import com.google.android.gms.maps.model.CameraPosition
 
 
 class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
@@ -111,13 +108,13 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val distance : Double = Math.pow(10.0,((txPower-rssi)/(10.0*n)))
         return distance
     }
-    fun calLocation(R1:Int,R2:Int,R3:Int){
+    fun calLocation(distance1:Int, distance2:Int, distance3:Int){
         val x1: Double = 1.0
         val x2: Double = 1.0
         val x3: Double = 1.0
         val y3: Double = 1.0
-        val X : Double = ((R1*R1)-(R2*R2)+(x2*x2))/(2*x2)
-        val Y : Double = ((R1*R1)-(R3*R3)+(x3*x3)+(y3*y3)-(2*x3*x1))/(2*y3)
+        val X : Double = ((distance1*distance1)-(distance2*distance2)+(x2*x2))/(2*x2)
+        val Y : Double = ((distance1*distance1)-(distance3*distance3)+(x3*x3)+(y3*y3)-(2*x3*x1))/(2*y3)
         val myLocation : LatLng = LatLng(X,Y)
         mMap.addMarker(MarkerOptions().position(myLocation).title("Marker"))
     }
