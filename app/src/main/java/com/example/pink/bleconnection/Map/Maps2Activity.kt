@@ -101,10 +101,8 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                 beaconInformation[3][3] = getDistance(result.rssi,beaconInformation[3][2]).toInt()
                 beaconInformation[3][4] = 1
             }
-            if (beaconInformation[0][4]+beaconInformation[1][4]+beaconInformation[2][4]+beaconInformation[3][4]>=3){
-                for(item in beaconInformation){
-
-                }
+            if (beaconInformation[0][4]+beaconInformation[1][4]+beaconInformation[3][4]>=3){
+                calLocation_V1(0,1,3)
             }
         }
     }
