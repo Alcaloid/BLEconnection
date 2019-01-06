@@ -82,8 +82,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             mMap.cameraPosition.zoom < 3f -> mMap.animateCamera(CameraUpdateFactory.zoomTo(3f))
         }
         startScanner()
-//        mMap.setMinZoomPreference(10.0f) //zoomout
-//        mMap.setMaxZoomPreference(14.0f) // zoomin
     }
 
     private var leScanCallBack = object : ScanCallback(){
@@ -120,7 +118,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
 //                    }
 //                    count = count + 1
 //                }
-//                calLocation_V1(minBeaconIndex[0],minBeaconIndex[1],minBeaconIndex[2])
+//                markLocation(minBeaconIndex[0],minBeaconIndex[1],minBeaconIndex[2])
 //            }
         }
     }
@@ -145,6 +143,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val myLocation : LatLng = LatLng(X,Y)
         mMap.addMarker(MarkerOptions().position(myLocation).title("MyLocation"))
     }
+
     fun markLocation(beacon1:Int, beacon2:Int, beacon3:Int){
         val distance1 = beaconInformation[beacon1][3]
         val distance2 = beaconInformation[beacon2][3]
@@ -155,7 +154,18 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val y1 = beaconInformation[beacon1][1]
         val y2 = beaconInformation[beacon2][1]
         val y3 = beaconInformation[beacon3][1]
+        val valueA = (-2*x1) + (2*x2)
+        val valueB = (-2*y1) + (2*y2)
+        val valueC = (distance1*distance1) - (distance2*distance2) - (x1*x1) + (x2*x2) - (y1*y1) + (y2*y2)
+        val valueD = (-2*x2) + (2*x3)
+        val valueE = (-2*y2) + (2*y3)
+        val valueF = (distance2*distance2) - (distance3*distance3) - (x2*x2) + (x3*x3) - (y2*y2) + (y3*y3)
+        val finalX = (((valueC*valueE) - (valueF*valueB))/((valueE*valueA)-(valueB*valueD))).toDouble()
+        val finalY = (((valueC*valueD)-(valueA*valueF))/((valueB*valueD)-(valueA*valueE))).toDouble()
+        val myLocation : LatLng = LatLng(finalX,finalY)
+        mMap.addMarker(MarkerOptions().position(myLocation).title("MyLocation"))
     }
+
     override fun onDestroy() {
         super.onDestroy()
         mScanner.stopScan(leScanCallBack)
