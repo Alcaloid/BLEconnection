@@ -56,7 +56,7 @@
             android:name=".Map.Maps2Activity"
             android:label="@string/title_activity_maps2"
             android:screenOrientation="portrait" />
-        <activity android:name=".DemoAppActivity"></activity>
+        <activity android:name=".BLEScanner.BLEscannerNewVersionActivity"></activity>
     </application>
 
 </manifest>
