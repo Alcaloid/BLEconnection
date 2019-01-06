@@ -35,8 +35,9 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             intArrayOf(0,15,-77,0,0,0), // beacon2
             intArrayOf(11,15,-77,0,0,0)  // beacon3
     )
-    var count : Int = 0
-
+    var count : Int =0
+    var minValue : Int = 1000
+    var minBeaconIndex : Array<Int> = arrayOf(0,0,0)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -101,9 +102,26 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                 beaconInformation[3][3] = getDistance(result.rssi,beaconInformation[3][2]).toInt()
                 beaconInformation[3][4] = 1
             }
+
             if (beaconInformation[0][4]+beaconInformation[1][4]+beaconInformation[3][4]>=3){
                 calLocation_V1(0,1,3)
             }
+
+//            if (beaconInformation[0][4]+beaconInformation[1][4]+beaconInformation[2][4]+beaconInformation[3][4]>=3){
+//                count = 0
+//                while (count!=3){
+//                    minValue = 1000
+//                    for (item in 0..3){
+//                        if(beaconInformation[item][4] < minValue){
+//                            minValue = beaconInformation[item][4]
+//                            beaconInformation[item][4] = 1000
+//                            minBeaconIndex[count] = item
+//                        }
+//                    }
+//                    count = count + 1
+//                }
+//                calLocation_V1(minBeaconIndex[0],minBeaconIndex[1],minBeaconIndex[2])
+//            }
         }
     }
     private fun getDistance(rssi: Int,txPower:Int):Double{
@@ -126,6 +144,17 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val Y : Double = ((distance1*distance1)-(distance3*distance3)+(x3*x3)+(y3*y3)-(2*x3*x1))/(2*y3).toDouble()
         val myLocation : LatLng = LatLng(X,Y)
         mMap.addMarker(MarkerOptions().position(myLocation).title("MyLocation"))
+    }
+    fun markLocation(beacon1:Int, beacon2:Int, beacon3:Int){
+        val distance1 = beaconInformation[beacon1][3]
+        val distance2 = beaconInformation[beacon2][3]
+        val distance3 = beaconInformation[beacon3][3]
+        val x1 = beaconInformation[beacon1][0]
+        val x2 = beaconInformation[beacon2][0]
+        val x3 = beaconInformation[beacon3][0]
+        val y1 = beaconInformation[beacon1][1]
+        val y2 = beaconInformation[beacon2][1]
+        val y3 = beaconInformation[beacon3][1]
     }
     override fun onDestroy() {
         super.onDestroy()

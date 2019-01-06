@@ -34,5 +34,20 @@ class MainActivity : AppCompatActivity() {
             intent = Intent(this, Maps2Activity::class.java)
             startActivity(intent)
         }
+
+//        var testingArray : Array<IntArray> = arrayOf(
+//                intArrayOf(11,12,13,14,15),
+//                intArrayOf(21,22,23,24,25),
+//                intArrayOf(31,32,33,34,35),
+//                intArrayOf(41,42,43,44,45)
+//        )
+//        var count : Int = 0
+////        for (item in testingArray){
+////            count = item[3]
+////            println("num: "+item+"item : "+ item[3]+" count : "+ count)
+////        }
+//        for(item in 0..3){
+//            println("1: "+ testingArray[item]+" 2:"+testingArray[item][4])
+//        }
     }
 }
