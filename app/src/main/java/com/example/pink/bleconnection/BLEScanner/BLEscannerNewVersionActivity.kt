@@ -46,6 +46,10 @@ class BLEscannerNewVersionActivity : AppCompatActivity(){
 //        mBluetoothAdapter = bluetoothManager.getAdapter();
     }
 
+    override fun onResume() {
+        super.onResume()
+
+    }
     fun toast(text : String){
         Toast.makeText(this,text, Toast.LENGTH_SHORT).show()
     }
