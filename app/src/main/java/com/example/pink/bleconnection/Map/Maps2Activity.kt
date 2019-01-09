@@ -61,7 +61,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     var tmp : DoubleArray = doubleArrayOf()
     var lastLocationloc: Location? = null
     var startLocation : Location? = null
-    var myLocation : Location? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -174,13 +173,11 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val finalX = (((valueC*valueE) - (valueF*valueB))/((valueE*valueA)-(valueB*valueD))).toDouble()
         val finalY = (((valueC*valueD)-(valueA*valueF))/((valueB*valueD)-(valueA*valueE))).toDouble()
         val myLocation : LatLng = LatLng(finalX,finalY)
-        println("MyLocation : "+myLocation)
         isMyLocation.remove()
         isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation).title("MyLocation"))
         setStartData()
     }
     fun setStartData(){
-        println("The data will restart")
         for (i in 0..beaconSignal.size-1){
             beaconSignal[i].clear()
         }
@@ -190,20 +187,12 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val averageSignal : Array<Int> = arrayOf(0,0,0,0)
         for (i in 0..beaconSignal.size-1){
             averageSignal[i] = findAverage(beaconSignal[i])
-            if (averageSignal[i]!= -100000)
+            if (averageSignal[i]!= -100000) {
+//                println("Beacon:"+dataDistance[i][0]+"->average:"+averageSignal[i]+" Txpower:"+beaconInformation[i][2])
                 dataDistance[i][1] = getDistance(averageSignal[i],beaconInformation[i][2])
-        }
-        for (i in 0..dataDistance.size-1){
-            for (j in 0..dataDistance.size-1){
-                if (j != dataDistance.size-1){
-                    if (dataDistance[j][1] > dataDistance[j+1][1]){
-                        tmp = dataDistance[j]
-                        dataDistance[j] = dataDistance[j+1]
-                        dataDistance[j+1] = tmp
-                    }
-                }
             }
         }
+        distanceMinToMax()
         if ((dataDistance[0][1] != 1000.0)&&(dataDistance[1][1]!=1000.0)&&(dataDistance[2][1]!=1000.0)){
             markLocation(dataDistance[0][0].toInt(),dataDistance[1][0].toInt(),dataDistance[2][0].toInt(),
                     dataDistance[0][1],dataDistance[1][1],dataDistance[2][1])
@@ -217,12 +206,23 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             averageNumber = 0
             for (i in 0..dataArray.size-1){
                 averageNumber = averageNumber + dataArray[i]
-                println("Round:"+i+"->"+averageNumber)
             }
             averageNumber = averageNumber/dataArray.size
-            println("Average is" + averageNumber)
         }
         return averageNumber
+    }
+    fun distanceMinToMax(){
+        for (i in 0..dataDistance.size-1){
+            for (j in 0..dataDistance.size-1){
+                if (j != dataDistance.size-1){
+                    if (dataDistance[j][1] > dataDistance[j+1][1]){
+                        tmp = dataDistance[j]
+                        dataDistance[j] = dataDistance[j+1]
+                        dataDistance[j+1] = tmp
+                    }
+                }
+            }
+        }
     }
     fun startScanner(){
         mHandler.postDelayed({
