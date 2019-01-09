@@ -76,7 +76,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         }
         mapFragment.getMapAsync(this)
     }
-
     override fun onResume() {
         super.onResume()
         val locationPermissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -91,7 +90,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
-
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -163,7 +161,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                 }
                 markLocation(dataDistance[0][0].toInt(),dataDistance[1][0].toInt(),dataDistance[2][0].toInt(),
                         dataDistance[0][1],dataDistance[1][1],dataDistance[2][1])
-
             }
         }
     }
@@ -189,9 +186,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val valueF = (distance2*distance2) - (distance3*distance3) - (x2*x2) + (x3*x3) - (y2*y2) + (y3*y3)
         val finalX = (((valueC*valueE) - (valueF*valueB))/((valueE*valueA)-(valueB*valueD))).toDouble()
         val finalY = (((valueC*valueD)-(valueA*valueF))/((valueB*valueD)-(valueA*valueE))).toDouble()
-//        if (startLocation == null){
-//            startLocation =
-//        }
         val myLocation : LatLng = LatLng(finalX,finalY)
         isMyLocation.remove()
         isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation).title("MyLocation"))
