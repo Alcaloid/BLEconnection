@@ -39,10 +39,10 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
 
     //0,1 is x,y and 2 is txpower and 3 is distance from rssi and 4 is receive rssi and 5 is distance
     private var beaconInformation : Array<IntArray> = arrayOf(
-            intArrayOf(0,0,-69,0), // beacon0
-            intArrayOf(11,0,-74,0), // beacon1
-            intArrayOf(0,15,-77,0), // beacon2
-            intArrayOf(11,15,-77,0)  // beacon3
+            intArrayOf(0,0,-69), // beacon0
+            intArrayOf(11,0,-74), // beacon1
+            intArrayOf(0,15,-77), // beacon2
+            intArrayOf(11,15,-77)  // beacon3
     )
     private var dataDistance : Array<DoubleArray> = arrayOf(
             //0 is uuid and 1 is distance
@@ -50,6 +50,12 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             doubleArrayOf(1.0,1000.0),
             doubleArrayOf(2.0,1000.0),
             doubleArrayOf(3.0,1000.0)
+    )
+    private var beaconSignal : Array<ArrayList<Int>> = arrayOf(
+            arrayListOf(),
+            arrayListOf(),
+            arrayListOf(),
+            arrayListOf()
     )
     var canNavigator : Boolean = false
     var tmp : DoubleArray = doubleArrayOf()
@@ -135,32 +141,13 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
             if(result.device.name == "RL0"){
-                dataDistance[0][1] = getDistance(result.rssi,beaconInformation[0][2])
-                beaconInformation[0][3] = 1
+                beaconSignal[0].add(result.rssi)
             }else if (result.device.name == "RL1"){
-                dataDistance[1][1] = getDistance(result.rssi,beaconInformation[1][2])
-                beaconInformation[1][3] = 1
+                beaconSignal[1].add(result.rssi)
             }else if (result.device.name == "RL2"){
-                dataDistance[2][1] = getDistance(result.rssi,beaconInformation[2][2])
-                beaconInformation[2][3] = 1
+                beaconSignal[2].add(result.rssi)
             }else if (result.device.name == "RL3"){
-                dataDistance[3][1] = getDistance(result.rssi,beaconInformation[3][2])
-                beaconInformation[3][3] = 1
-            }
-            if (beaconInformation[0][3]+beaconInformation[1][3]+beaconInformation[2][3]+beaconInformation[3][3]>=3){
-                for (i in 0..dataDistance.size-1){
-                    for (j in 0..dataDistance.size-1){
-                        if (j != dataDistance.size-1){
-                            if (dataDistance[j][1] > dataDistance[j+1][1]){
-                                tmp = dataDistance[j]
-                                dataDistance[j] = dataDistance[j+1]
-                                dataDistance[j+1] = tmp
-                            }
-                        }
-                    }
-                }
-                markLocation(dataDistance[0][0].toInt(),dataDistance[1][0].toInt(),dataDistance[2][0].toInt(),
-                        dataDistance[0][1],dataDistance[1][1],dataDistance[2][1])
+                beaconSignal[3].add(result.rssi)
             }
         }
     }
@@ -187,18 +174,61 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val finalX = (((valueC*valueE) - (valueF*valueB))/((valueE*valueA)-(valueB*valueD))).toDouble()
         val finalY = (((valueC*valueD)-(valueA*valueF))/((valueB*valueD)-(valueA*valueE))).toDouble()
         val myLocation : LatLng = LatLng(finalX,finalY)
+        println("MyLocation : "+myLocation)
         isMyLocation.remove()
         isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation).title("MyLocation"))
+        setStartData()
     }
-    override fun onDestroy() {
-        super.onDestroy()
-        mScanner.stopScan(leScanCallBack)
-        beaconInformation[0][3] = 0
-        beaconInformation[1][3] = 0
-        beaconInformation[2][3] = 0
-        beaconInformation[3][3] = 0
+    fun setStartData(){
+        println("The data will restart")
+        for (i in 0..beaconSignal.size-1){
+            beaconSignal[i].clear()
+        }
+        startScanner()
+    }
+    fun findMyLocation(){
+        val averageSignal : Array<Int> = arrayOf(0,0,0,0)
+        for (i in 0..beaconSignal.size-1){
+            averageSignal[i] = findAverage(beaconSignal[i])
+            if (averageSignal[i]!= -100000)
+                dataDistance[i][1] = getDistance(averageSignal[i],beaconInformation[i][2])
+        }
+        for (i in 0..dataDistance.size-1){
+            for (j in 0..dataDistance.size-1){
+                if (j != dataDistance.size-1){
+                    if (dataDistance[j][1] > dataDistance[j+1][1]){
+                        tmp = dataDistance[j]
+                        dataDistance[j] = dataDistance[j+1]
+                        dataDistance[j+1] = tmp
+                    }
+                }
+            }
+        }
+        if ((dataDistance[0][1] != 1000.0)&&(dataDistance[1][1]!=1000.0)&&(dataDistance[2][1]!=1000.0)){
+            markLocation(dataDistance[0][0].toInt(),dataDistance[1][0].toInt(),dataDistance[2][0].toInt(),
+                    dataDistance[0][1],dataDistance[1][1],dataDistance[2][1])
+        }else{
+            startScanner() //get more signal
+        }
+    }
+    fun findAverage(dataArray: ArrayList<Int>):Int{
+        var averageNumber : Int = -100000
+        if (!dataArray.isEmpty()){
+            averageNumber = 0
+            for (i in 0..dataArray.size-1){
+                averageNumber = averageNumber + dataArray[i]
+                println("Round:"+i+"->"+averageNumber)
+            }
+            averageNumber = averageNumber/dataArray.size
+            println("Average is" + averageNumber)
+        }
+        return averageNumber
     }
     fun startScanner(){
+        mHandler.postDelayed({
+            stopScanner()
+            findMyLocation()
+        },10000)
         mScanner.startScan(leScanCallBack)
     }
     fun stopScanner(){
@@ -206,5 +236,9 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     }
     fun toast(text : String){
         Toast.makeText(this,text, Toast.LENGTH_SHORT).show()
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        mScanner.stopScan(leScanCallBack)
     }
 }

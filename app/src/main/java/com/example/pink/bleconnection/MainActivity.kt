@@ -35,19 +35,33 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
 
-//        var testingArray : Array<IntArray> = arrayOf(
-//                intArrayOf(11,12,13,14,15),
-//                intArrayOf(21,22,23,24,25),
-//                intArrayOf(31,32,33,34,35),
-//                intArrayOf(41,42,43,44,45)
+//        var testingArray : Array<ArrayList<Int>> = arrayOf(
+//                arrayListOf(),
+//                arrayListOf(),
+//                arrayListOf(),
+//                arrayListOf()
 //        )
-//        var count : Int = 0
-////        for (item in testingArray){
-////            count = item[3]
-////            println("num: "+item+"item : "+ item[3]+" count : "+ count)
-////        }
-//        for(item in 0..3){
-//            println("1: "+ testingArray[item]+" 2:"+testingArray[item][4])
+//        testingArray[0].add(11)
+//        testingArray[0].add(12)
+//        testingArray[0].add(13)
+//        testingArray[0].add(14)
+//        testingArray[1].add(21)
+//        testingArray[1].add(22)
+//        testingArray[1].add(23)
+//        testingArray[1].add(24)
+//        testingArray[2].add(31)
+//        testingArray[2].add(32)
+//        testingArray[2].add(33)
+//        testingArray[2].add(34)
+//        testingArray[3].add(41)
+//        testingArray[3].add(42)
+//        testingArray[3].add(43)
+//        testingArray[3].add(44)
+//
+//        for (item in testingArray){
+//            for (i in 0..item.size-1){
+//                println("Data:"+ i + " is "+ item[i])
+//            }
 //        }
     }
 }
