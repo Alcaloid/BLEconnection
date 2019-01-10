@@ -3,9 +3,7 @@ package com.example.pink.bleconnection.Map
 import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
-import android.bluetooth.le.BluetoothLeScanner
-import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanResult
+import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -36,6 +34,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     lateinit var mScanner : BluetoothLeScanner
     lateinit var isMyLocation : Marker
     lateinit var mHandler: Handler
+    lateinit var scanSetting : ScanSettings
 
     //0,1 is x,y and 2 is txpower and 3 is distance from rssi and 4 is receive rssi and 5 is distance
     private var beaconInformation : Array<IntArray> = arrayOf(
@@ -57,6 +56,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             arrayListOf(),
             arrayListOf()
     )
+    private var uidFilter : ArrayList<ScanFilter> = arrayListOf()
     var canNavigator : Boolean = false
     var tmp : DoubleArray = doubleArrayOf()
     var lastLocationloc: Location? = null
@@ -132,6 +132,8 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         }
         if (canNavigator){
             mScanner = mBluetoothAdapter.bluetoothLeScanner
+//            addUUID()
+//            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_POWER).build()
             startScanner()
         }
     }
@@ -139,6 +141,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     private var leScanCallBack = object : ScanCallback(){
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
+            println("GetData->"+result.device.name+" Address:"+result.device.address)
             if(result.device.name == "RL0"){
                 beaconSignal[0].add(result.rssi)
             }else if (result.device.name == "RL1"){
@@ -175,6 +178,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val myLocation : LatLng = LatLng(finalX,finalY)
         isMyLocation.remove()
         isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation).title("MyLocation"))
+        toast("myLocation:"+myLocation)
         setStartData()
     }
     fun setStartData(){
@@ -229,6 +233,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             stopScanner()
             findMyLocation()
         },10000)
+//        mScanner.startScan(uidFilter,scanSetting,leScanCallBack)
         mScanner.startScan(leScanCallBack)
     }
     fun stopScanner(){
@@ -236,6 +241,12 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     }
     fun toast(text : String){
         Toast.makeText(this,text, Toast.LENGTH_SHORT).show()
+    }
+    fun addUUID(){
+        uidFilter.add(ScanFilter.Builder().setDeviceAddress("DC:0B:D4:DF:34:7E").build())
+        uidFilter.add(ScanFilter.Builder().setDeviceAddress("D3:D8:8B:93:D5:D1").build())
+        uidFilter.add(ScanFilter.Builder().setDeviceAddress("E9:56:E4:39:C9:47").build())
+        uidFilter.add(ScanFilter.Builder().setDeviceAddress("CD:03:D7:B1:12:96").build())
     }
     override fun onDestroy() {
         super.onDestroy()
