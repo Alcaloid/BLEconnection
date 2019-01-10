@@ -4,9 +4,7 @@ import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothManager
-import android.bluetooth.le.BluetoothLeScanner
-import android.bluetooth.le.ScanCallback
-import android.bluetooth.le.ScanResult
+import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -31,11 +29,13 @@ class BluetoothReciveRSSIActivity : AppCompatActivity() {
     lateinit var mBluetoothAdapter : BluetoothAdapter
     lateinit var mScanner : BluetoothLeScanner
     lateinit var mHandler: Handler
+    lateinit var scanSetting : ScanSettings
     private var rl0RSSI = ArrayList<String>()
     private var rl1RSSI = ArrayList<String>()
     private var rl2RSSI = ArrayList<String>()
     private var rl3RSSI = ArrayList<String>()
     var locationPermissionCheck : Int = 0
+    private var uidFilter : ArrayList<ScanFilter> = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +43,7 @@ class BluetoothReciveRSSIActivity : AppCompatActivity() {
 
         val Request_Bluetooth : Int = 1
         var onStartScan : Boolean = false
+        mHandler = Handler()
         mBluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = mBluetoothManager.adapter
         locationPermissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -70,18 +71,15 @@ class BluetoothReciveRSSIActivity : AppCompatActivity() {
         }
 
         mScanner = mBluetoothAdapter.bluetoothLeScanner
+            addUUID()
+            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.CALLBACK_TYPE_ALL_MATCHES).build()
         scanner_button.setOnClickListener {
-            if (mBluetoothAdapter.isEnabled && locationPermissionCheck==0){
-                if (onStartScan){
-                    onStartScan = !onStartScan
-                    scanner_button.text = "Scan"
-                    stopScanner()
-                }else{
-                    onStartScan = !onStartScan
-                    scanner_button.text = "Stop Scan"
-                    startScanner()
-                }
-            }
+            scanner_button.text = "Stop Scan"
+            startScanner()
+        }
+        scan_2_button.setOnClickListener {
+            scan_2_button.text = "Stop Scan"
+            startScanner2()
         }
         rl0_button.setOnClickListener {
             showListView("0")
@@ -105,7 +103,7 @@ class BluetoothReciveRSSIActivity : AppCompatActivity() {
     private var leScanCallBack = object : ScanCallback(){
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
-
+            println("Device->"+result.device.name+" Address->"+result.device.address)
             if(result.device.name == "RL0"){
                 rl0RSSI.add(result.rssi.toString())
             }else if (result.device.name == "RL1"){
@@ -142,15 +140,38 @@ class BluetoothReciveRSSIActivity : AppCompatActivity() {
     }
     fun startScanner(){
         toast("start Scanning")
-//        mHandler.postDelayed({
-//            mScanner.stopScan(leScanCallBack)
-//        },1000)
+        mHandler.postDelayed({
+            stopScanner()
+            println("RL0->"+rl0RSSI)
+            println("RL1->"+rl1RSSI)
+            println("RL2->"+rl2RSSI)
+            println("RL3->"+rl3RSSI)
+        },10000)
         mScanner.startScan(leScanCallBack)
+    }
+    fun startScanner2(){
+        toast("start Scanning")
+        mHandler.postDelayed({
+            stopScanner()
+            println("RL0->"+rl0RSSI)
+            println("RL1->"+rl1RSSI)
+            println("RL2->"+rl2RSSI)
+            println("RL3->"+rl3RSSI)
+        },10000)
+        mScanner.startScan(uidFilter,scanSetting,leScanCallBack)
     }
 
     fun stopScanner(){
         toast("stop Scanning")
+        scanner_button.text = "Scan"
+        scan_2_button.text = "Scan"
         mScanner.stopScan(leScanCallBack)
+    }
+    fun addUUID(){
+        uidFilter.add(ScanFilter.Builder().setDeviceAddress("DC:0B:D4:DF:34:7E").build())
+        uidFilter.add(ScanFilter.Builder().setDeviceAddress("D3:D8:8B:93:D5:D1").build())
+        uidFilter.add(ScanFilter.Builder().setDeviceAddress("E9:56:E4:39:C9:47").build())
+        uidFilter.add(ScanFilter.Builder().setDeviceAddress("CD:03:D7:B1:12:96").build())
     }
     override fun onDestroy() {
         super.onDestroy()

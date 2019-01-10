@@ -39,9 +39,9 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     //0,1 is x,y and 2 is txpower and 3 is distance from rssi and 4 is receive rssi and 5 is distance
     private var beaconInformation : Array<IntArray> = arrayOf(
             intArrayOf(0,0,-69), // beacon0
-            intArrayOf(11,0,-74), // beacon1
-            intArrayOf(0,15,-77), // beacon2
-            intArrayOf(11,15,-77)  // beacon3
+            intArrayOf(15,0,-74), // beacon1
+            intArrayOf(0,11,-77), // beacon2
+            intArrayOf(15,11,-77)  // beacon3
     )
     private var dataDistance : Array<DoubleArray> = arrayOf(
             //0 is uuid and 1 is distance
@@ -109,13 +109,13 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         mMap.mapType = GoogleMap.MAP_TYPE_NONE
         val testingRoom = LatLngBounds(
                 LatLng(0.0, 0.0),
-                LatLng(11.0,15.0))
+                LatLng(15.0,11.0))
         val testingMap = GroundOverlayOptions()
                 .image(BitmapDescriptorFactory.fromResource(R.drawable.seniortesting))
                 .positionFromBounds(testingRoom)
-        val locationZoom = LatLng(5.5,7.5)
+        val locationZoom = LatLng(7.5,5.5)
         val cameraTraget = LatLngBounds(
-                LatLng(-0.01,-0.01), LatLng(20.0, 20.0))
+                LatLng(-0.01,-0.01), LatLng(16.0, 12.0))
         mMap.addGroundOverlay(testingMap)
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationZoom,5f))
         mMap.setLatLngBoundsForCameraTarget(cameraTraget)
@@ -129,11 +129,12 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             }else if(mMap.cameraPosition.zoom < minZoom){
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(minZoom))
             }
+//            if (mMap.cameraPosition.)
         }
         if (canNavigator){
             mScanner = mBluetoothAdapter.bluetoothLeScanner
-//            addUUID()
-//            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_POWER).build()
+            addUUID()
+            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.CALLBACK_TYPE_ALL_MATCHES).build()
             startScanner()
         }
     }
@@ -233,8 +234,8 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             stopScanner()
             findMyLocation()
         },10000)
-//        mScanner.startScan(uidFilter,scanSetting,leScanCallBack)
-        mScanner.startScan(leScanCallBack)
+        mScanner.startScan(uidFilter,scanSetting,leScanCallBack)
+//        mScanner.startScan(leScanCallBack)
     }
     fun stopScanner(){
         mScanner.stopScan(leScanCallBack)
