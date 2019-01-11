@@ -23,7 +23,6 @@ import com.google.android.gms.maps.model.*
 import android.support.v4.app.ActivityCompat
 import kotlinx.android.synthetic.main.activity_maps2.*
 
-
 class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
@@ -34,8 +33,8 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     lateinit var mHandler: Handler
     lateinit var scanSetting : ScanSettings
 
-    //0,1 is x,y and 2 is txpower and 3 is distance from rssi and 4 is receive rssi and 5 is distance
     private var beaconInformation : Array<IntArray> = arrayOf(
+            //0,1 is x,y and 2 is txpower
             intArrayOf(0,0,-69), // beacon0
             intArrayOf(15,0,-74), // beacon1
             intArrayOf(0,11,-77), // beacon2

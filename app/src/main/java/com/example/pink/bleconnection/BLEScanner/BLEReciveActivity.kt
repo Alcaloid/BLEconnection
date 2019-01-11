@@ -19,6 +19,7 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.example.pink.bleconnection.R
 import kotlinx.android.synthetic.main.activity_bluetooth_recive_rssi.*
+import org.jetbrains.annotations.TestOnly
 import kotlin.collections.ArrayList
 
 
@@ -28,7 +29,7 @@ class BluetoothReciveRSSIActivity : AppCompatActivity() {
     lateinit var mBluetoothManager : BluetoothManager
     lateinit var mBluetoothAdapter : BluetoothAdapter
     lateinit var mScanner : BluetoothLeScanner
-    lateinit var mHandler: Handler
+    lateinit var mHandler : Handler
     lateinit var scanSetting : ScanSettings
     private var rl0RSSI = ArrayList<String>()
     private var rl1RSSI = ArrayList<String>()
@@ -132,7 +133,7 @@ class BluetoothReciveRSSIActivity : AppCompatActivity() {
         val adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, listview)
         rssilistview.adapter = adapter
     }
-    fun reset(){
+    fun reset() {
         rl0RSSI.clear()
         rl1RSSI.clear()
         rl2RSSI.clear()
