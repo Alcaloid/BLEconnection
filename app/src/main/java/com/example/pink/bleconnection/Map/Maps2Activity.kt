@@ -21,9 +21,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import android.support.v4.app.ActivityCompat
-
-
-
+import kotlinx.android.synthetic.main.activity_maps2.*
 
 
 class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
@@ -131,12 +129,40 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             }
 //            if (mMap.cameraPosition.)
         }
-        if (canNavigator){
-            mScanner = mBluetoothAdapter.bluetoothLeScanner
-            addUUID()
-            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.CALLBACK_TYPE_ALL_MATCHES).build()
-            startScanner()
+
+        var rssi1 : Int = -10000
+        var rssi2 : Int = -10000
+        var rssi3 : Int = -10000
+        var rssi4 : Int = -10000
+        var distance1 : Double = -1000.0
+        var distance2 : Double = -1000.0
+        var distance3 : Double = -1000.0
+        var distance4 : Double = -1000.0
+        dummy_button.setOnClickListener {
+            if (!edit_rssitext.text.toString().isEmpty()){
+                rssi1 = edit_rssitext.text.toString().toInt()
+                distance1 = getDistance(rssi1,-60)
+            }
+            if (!edit_rssitext2.text.toString().isEmpty()){
+                rssi2 = edit_rssitext2.text.toString().toInt()
+                distance2 = getDistance(rssi2,-60)
+            }
+            if (!edit_rssitext3.text.toString().isEmpty()){
+                rssi3 = edit_rssitext3.text.toString().toInt()
+                distance3 = getDistance(rssi3,-60)
+            }
+            if (!edit_rssitext4.text.toString().isEmpty()){
+                rssi4 = edit_rssitext4.text.toString().toInt()
+                distance4 = getDistance(rssi4,-60)
+            }
+            markLocation(0,1,2,distance1,distance2,distance3)
         }
+//        if (canNavigator){
+//            mScanner = mBluetoothAdapter.bluetoothLeScanner
+//            addUUID()
+//            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.CALLBACK_TYPE_ALL_MATCHES).build()
+//            startScanner()
+//        }
     }
 
     private var leScanCallBack = object : ScanCallback(){
@@ -159,6 +185,9 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         //d = 10 ^ ((TxPower - RSSI) / (10 * n))
         val n: Int = 2
         val distance : Double = Math.pow(10.0,((txPower-rssi)/(10.0*n)))
+        println("RSSI is "+rssi)
+        println("txPower is "+ txPower)
+        println("Distance is "+ distance)
         return distance
     }
     fun markLocation(beacon1:Int, beacon2:Int, beacon3:Int,distance1:Double,distance2:Double,distance3:Double){
@@ -174,19 +203,28 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val valueD = (-2*x2) + (2*x3)
         val valueE = (-2*y2) + (2*y3)
         val valueF = (distance2*distance2) - (distance3*distance3) - (x2*x2) + (x3*x3) - (y2*y2) + (y3*y3)
-        val finalX = (((valueC*valueE) - (valueF*valueB))/((valueE*valueA)-(valueB*valueD))).toDouble()
-        val finalY = (((valueC*valueD)-(valueA*valueF))/((valueB*valueD)-(valueA*valueE))).toDouble()
+        val finalX = (((valueC*valueE) - (valueF*valueB))/((valueE*valueA)-(valueB*valueD)))
+        val finalY = (((valueC*valueD)-(valueA*valueF))/((valueB*valueD)-(valueA*valueE)))
         val myLocation : LatLng = LatLng(finalX,finalY)
+        println("Mylocation->"+ myLocation)
+        println("ValueA->"+valueA)
+        println("ValueB->"+valueB)
+        println("ValueC->"+valueC)
+        println("ValueD->"+valueD)
+        println("ValueE->"+valueE)
+        println("ValueF->"+valueF)
+        println("FinalX->"+finalX)
+        println("FinalY->"+finalY)
         isMyLocation.remove()
         isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation).title("MyLocation"))
-        toast("myLocation:"+myLocation)
+//        toast("myLocation:"+myLocation)
         setStartData()
     }
     fun setStartData(){
         for (i in 0..beaconSignal.size-1){
             beaconSignal[i].clear()
         }
-        startScanner()
+//        startScanner()
     }
     fun findMyLocation(){
         val averageSignal : Array<Int> = arrayOf(0,0,0,0)
@@ -194,6 +232,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             averageSignal[i] = findAverage(beaconSignal[i])
             if (averageSignal[i]!= -100000) {
 //                println("Beacon:"+dataDistance[i][0]+"->average:"+averageSignal[i]+" Txpower:"+beaconInformation[i][2])
+                println("Beacon is "+dataDistance[i][0])
                 dataDistance[i][1] = getDistance(averageSignal[i],beaconInformation[i][2])
             }
         }
