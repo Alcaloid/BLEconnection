@@ -6,20 +6,6 @@
     android:layout_height="match_parent"
     tools:context=".Map.MapActivity">
 
-    <com.jsibbold.zoomage.ZoomageView
-        android:id="@+id/myZoomageView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:rotation="-90"
-        android:src="@drawable/ic_testmap"
-        app:zoomage_animateOnReset="true"
-        app:zoomage_autoCenter="true"
-        app:zoomage_autoResetMode="UNDER"
-        app:zoomage_maxScale="8"
-        app:zoomage_minScale="0.6"
-        app:zoomage_restrictBounds="false"
-        app:zoomage_translatable="true"
-        app:zoomage_zoomable="true" />
 
     <LinearLayout
         android:layout_width="match_parent"
