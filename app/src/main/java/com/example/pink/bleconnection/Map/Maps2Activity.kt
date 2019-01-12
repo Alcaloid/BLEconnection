@@ -7,6 +7,7 @@ import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -129,7 +130,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
 //            if (mMap.cameraPosition.)
         }
 
-        var rssi1 : Int = -10000
+        /*var rssi1 : Int = -10000
         var rssi2 : Int = -10000
         var rssi3 : Int = -10000
         var rssi4 : Int = -10000
@@ -155,13 +156,16 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                 distance4 = getDistance(rssi4,-60)
             }
             markLocation(0,1,2,distance1,distance2,distance3)
+        }*/
+        dummy_button.setOnClickListener {
+            startScanner()
         }
-//        if (canNavigator){
-//            mScanner = mBluetoothAdapter.bluetoothLeScanner
-//            addUUID()
-//            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.CALLBACK_TYPE_ALL_MATCHES).build()
-//            startScanner()
-//        }
+        if (canNavigator){
+            mScanner = mBluetoothAdapter.bluetoothLeScanner
+            addUUID()
+            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.CALLBACK_TYPE_ALL_MATCHES).build()
+            startScanner()
+        }
     }
 
     private var leScanCallBack = object : ScanCallback(){
@@ -196,6 +200,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val y1 = beaconInformation[beacon1][1]
         val y2 = beaconInformation[beacon2][1]
         val y3 = beaconInformation[beacon3][1]
+        var circle : Circle
         val valueA = (-2*x1) + (2*x2)
         val valueB = (-2*y1) + (2*y2)
         val valueC = (distance1*distance1) - (distance2*distance2) - (x1*x1) + (x2*x2) - (y1*y1) + (y2*y2)
@@ -204,6 +209,21 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val valueF = (distance2*distance2) - (distance3*distance3) - (x2*x2) + (x3*x3) - (y2*y2) + (y3*y3)
         val finalX = (((valueC*valueE) - (valueF*valueB))/((valueE*valueA)-(valueB*valueD)))
         val finalY = (((valueC*valueD)-(valueA*valueF))/((valueB*valueD)-(valueA*valueE)))
+        circle = mMap.addCircle(CircleOptions()
+                .center(LatLng(x1.toDouble(),y1.toDouble()))
+                .radius(distance1)
+                .strokeColor(Color.RED)
+                .fillColor(Color.BLUE))
+        circle = mMap.addCircle(CircleOptions()
+                .center(LatLng(x2.toDouble(),y2.toDouble()))
+                .radius(distance2)
+                .strokeColor(Color.GREEN)
+                .fillColor(Color.GRAY))
+        circle = mMap.addCircle(CircleOptions()
+                .center(LatLng(x3.toDouble(),y3.toDouble()))
+                .radius(distance3)
+                .strokeColor(Color.CYAN)
+                .fillColor(Color.WHITE))
         val myLocation : LatLng = LatLng(finalX,finalY)
         println("Mylocation->"+ myLocation)
         println("ValueA->"+valueA)
@@ -291,4 +311,5 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         super.onDestroy()
         mScanner.stopScan(leScanCallBack)
     }
+
 }
