@@ -36,6 +36,7 @@ class BluetoothReciveRSSIActivity : AppCompatActivity() {
     private var rl2RSSI = ArrayList<String>()
     private var rl3RSSI = ArrayList<String>()
     var locationPermissionCheck : Int = 0
+    var count : Int = 0
     private var uidFilter : ArrayList<ScanFilter> = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -138,29 +139,25 @@ class BluetoothReciveRSSIActivity : AppCompatActivity() {
         rl1RSSI.clear()
         rl2RSSI.clear()
         rl3RSSI.clear()
+        count = 0
     }
     fun startScanner(){
-        toast("start Scanning")
+            mHandler.postDelayed({
+                stopScanner()
+                printData()
+                runScanner(100,1)
+            },1000)
+            mScanner.startScan(uidFilter,scanSetting,leScanCallBack)
+            mScanner.startScan(leScanCallBack)
+    }
+    fun startScanner2(){
         mHandler.postDelayed({
             stopScanner()
-            println("RL0->"+rl0RSSI)
-            println("RL1->"+rl1RSSI)
-            println("RL2->"+rl2RSSI)
-            println("RL3->"+rl3RSSI)
+            printData()
+            runScanner(10,2)
         },10000)
         mScanner.startScan(uidFilter,scanSetting,leScanCallBack)
         mScanner.startScan(leScanCallBack)
-    }
-    fun startScanner2(){
-        toast("start Scanning")
-        mHandler.postDelayed({
-            stopScanner()
-            println("RL0->"+rl0RSSI)
-            println("RL1->"+rl1RSSI)
-            println("RL2->"+rl2RSSI)
-            println("RL3->"+rl3RSSI)
-        },10000)
-        mScanner.startScan(uidFilter,scanSetting,leScanCallBack)
     }
 
     fun stopScanner(){
@@ -168,6 +165,20 @@ class BluetoothReciveRSSIActivity : AppCompatActivity() {
         scanner_button.text = "Scan"
         scan_2_button.text = "Scan"
         mScanner.stopScan(leScanCallBack)
+    }
+    fun  printData(){
+        println("Count = "+count)
+        println("RL0->"+rl0RSSI)
+        println("RL1->"+rl1RSSI)
+        println("RL2->"+rl2RSSI)
+        println("RL3->"+rl3RSSI)
+    }
+    fun runScanner(round : Int,func : Int){
+        if (count != round){
+            count += 1
+            if (func ==1) startScanner()
+            else startScanner2()
+        }
     }
     fun addUUID(){
         uidFilter.add(ScanFilter.Builder().setDeviceAddress("DC:0B:D4:DF:34:7E").build())

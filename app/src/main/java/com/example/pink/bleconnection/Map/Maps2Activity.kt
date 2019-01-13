@@ -36,10 +36,10 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
 
     private var beaconInformation : Array<IntArray> = arrayOf(
             //0,1 is x,y and 2 is txpower
-            intArrayOf(0,0,-69), // beacon0
-            intArrayOf(15,0,-74), // beacon1
-            intArrayOf(0,11,-77), // beacon2
-            intArrayOf(15,11,-77)  // beacon3
+            intArrayOf(0,0,-64), // beacon0
+            intArrayOf(15,0,-68), // beacon1
+            intArrayOf(0,11,-68), // beacon2
+            intArrayOf(15,11,-68)  // beacon3
     )
     private var dataDistance : Array<DoubleArray> = arrayOf(
             //0 is uuid and 1 is distance
@@ -59,6 +59,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     var tmp : DoubleArray = doubleArrayOf()
     var lastLocationloc: Location? = null
     var startLocation : Location? = null
+    var count : Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -155,9 +156,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             }
             markLocation(0,1,2,distance1,distance2,distance3)
         }*/
-        dummy_button.setOnClickListener {
-            startScanner()
-        }
         if (canNavigator){
             mScanner = mBluetoothAdapter.bluetoothLeScanner
             addUUID()
@@ -224,14 +222,16 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         println("ValueF->"+valueF)
         println("FinalX->"+finalX)
         println("FinalY->"+finalY)
-        isMyLocation.remove()
-        isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation).title("MyLocation"))
+//        isMyLocation.remove()
+        isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation).title(count.toString()))
 //        toast("myLocation:"+myLocation)
+        count += 1
         setStartData()
     }
     fun setStartData(){
         for (i in 0..beaconSignal.size-1){
             beaconSignal[i].clear()
+            dataDistance[i][1] = 1000.0
         }
         startScanner()
     }
