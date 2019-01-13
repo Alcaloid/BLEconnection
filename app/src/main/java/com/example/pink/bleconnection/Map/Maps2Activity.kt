@@ -127,9 +127,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             }else if(mMap.cameraPosition.zoom < minZoom){
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(minZoom))
             }
-//            if (mMap.cameraPosition.)
         }
-
         /*var rssi1 : Int = -10000
         var rssi2 : Int = -10000
         var rssi3 : Int = -10000
@@ -209,22 +207,14 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val valueF = (distance2*distance2) - (distance3*distance3) - (x2*x2) + (x3*x3) - (y2*y2) + (y3*y3)
         val finalX = (((valueC*valueE) - (valueF*valueB))/((valueE*valueA)-(valueB*valueD)))
         val finalY = (((valueC*valueD)-(valueA*valueF))/((valueB*valueD)-(valueA*valueE)))
-        circle = mMap.addCircle(CircleOptions()
-                .center(LatLng(x1.toDouble(),y1.toDouble()))
-                .radius(distance1)
-                .strokeColor(Color.RED)
-                .fillColor(Color.BLUE))
-        circle = mMap.addCircle(CircleOptions()
-                .center(LatLng(x2.toDouble(),y2.toDouble()))
-                .radius(distance2)
-                .strokeColor(Color.GREEN)
-                .fillColor(Color.GRAY))
-        circle = mMap.addCircle(CircleOptions()
-                .center(LatLng(x3.toDouble(),y3.toDouble()))
-                .radius(distance3)
-                .strokeColor(Color.CYAN)
-                .fillColor(Color.WHITE))
+//        circle = mMap.addCircle(CircleOptions()
+//                .center(LatLng(x1.toDouble(),y1.toDouble()))
+//                .radius(distance1)
+//                .strokeColor(Color.RED)
+//                .fillColor(Color.BLUE))
+
         val myLocation : LatLng = LatLng(finalX,finalY)
+        toast("MyLocation "+myLocation)
         println("Mylocation->"+ myLocation)
         println("ValueA->"+valueA)
         println("ValueB->"+valueB)
@@ -243,7 +233,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         for (i in 0..beaconSignal.size-1){
             beaconSignal[i].clear()
         }
-//        startScanner()
+        startScanner()
     }
     fun findMyLocation(){
         val averageSignal : Array<Int> = arrayOf(0,0,0,0)
@@ -293,7 +283,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             findMyLocation()
         },10000)
         mScanner.startScan(uidFilter,scanSetting,leScanCallBack)
-//        mScanner.startScan(leScanCallBack)
+        mScanner.startScan(leScanCallBack)
     }
     fun stopScanner(){
         mScanner.stopScan(leScanCallBack)

@@ -104,7 +104,7 @@ class BluetoothReciveRSSIActivity : AppCompatActivity() {
     private var leScanCallBack = object : ScanCallback(){
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
-            println("Device->"+result.device.name+" Address->"+result.device.address)
+//            println("Device->"+result.device.name+" Address->"+result.device.address)
             if(result.device.name == "RL0"){
                 rl0RSSI.add(result.rssi.toString())
             }else if (result.device.name == "RL1"){
@@ -148,6 +148,7 @@ class BluetoothReciveRSSIActivity : AppCompatActivity() {
             println("RL2->"+rl2RSSI)
             println("RL3->"+rl3RSSI)
         },10000)
+        mScanner.startScan(uidFilter,scanSetting,leScanCallBack)
         mScanner.startScan(leScanCallBack)
     }
     fun startScanner2(){
