@@ -22,6 +22,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import android.support.v4.app.ActivityCompat
+import com.google.maps.android.SphericalUtil
 import kotlinx.android.synthetic.main.activity_maps2.*
 
 class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
@@ -111,7 +112,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                 LatLng(15.0,11.0))
         val testingMap = GroundOverlayOptions()
                 .image(BitmapDescriptorFactory.fromResource(R.drawable.seniortesting))
-                .positionFromBounds(testingRoom)
+                .positionFromBounds(testingRoom).zIndex(1f)
         val locationZoom = LatLng(7.5,5.5)
         val cameraTraget = LatLngBounds(
                 LatLng(-0.01,-0.01), LatLng(16.0, 12.0))
@@ -129,33 +130,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(minZoom))
             }
         }
-        /*var rssi1 : Int = -10000
-        var rssi2 : Int = -10000
-        var rssi3 : Int = -10000
-        var rssi4 : Int = -10000
-        var distance1 : Double = -1000.0
-        var distance2 : Double = -1000.0
-        var distance3 : Double = -1000.0
-        var distance4 : Double = -1000.0
-        dummy_button.setOnClickListener {
-            if (!edit_rssitext.text.toString().isEmpty()){
-                rssi1 = edit_rssitext.text.toString().toInt()
-                distance1 = getDistance(rssi1,-60)
-            }
-            if (!edit_rssitext2.text.toString().isEmpty()){
-                rssi2 = edit_rssitext2.text.toString().toInt()
-                distance2 = getDistance(rssi2,-60)
-            }
-            if (!edit_rssitext3.text.toString().isEmpty()){
-                rssi3 = edit_rssitext3.text.toString().toInt()
-                distance3 = getDistance(rssi3,-60)
-            }
-            if (!edit_rssitext4.text.toString().isEmpty()){
-                rssi4 = edit_rssitext4.text.toString().toInt()
-                distance4 = getDistance(rssi4,-60)
-            }
-            markLocation(0,1,2,distance1,distance2,distance3)
-        }*/
+//        makeUpData(-60,-840,-1080)
         if (canNavigator){
             mScanner = mBluetoothAdapter.bluetoothLeScanner
             addUUID()
@@ -179,7 +154,24 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
+    private fun makeUpData(R1:Int,R2:Int,R3:Int){
+        val distance1:Double = getDistance(R1,-60)
+        val distance2:Double = getDistance(R2,-60)
+        val distance3:Double = getDistance(R3,-60)
+        markLocation(0,1,2,distance1,distance2,distance3)
+//        drawCircle(0.0,0.0,distance1,Color.BLACK,Color.BLUE)
+//        drawCircle(15.0,0.0,distance2,Color.BLUE,Color.GREEN)
+//        drawCircle(15.0,11.0,distance3,Color.RED,Color.YELLOW)
 
+    }
+    private fun drawCircle(x:Double,y:Double,radius:Double,color1:Int,color2:Int){
+        mMap.addCircle(CircleOptions()
+                .center(LatLng(x,y))
+                .radius(radius)
+                .zIndex(0f)
+                .strokeColor(color1)
+                .fillColor(color2))
+    }
     private fun getDistance(rssi: Int,txPower:Int):Double{
         //d = 10 ^ ((TxPower - RSSI) / (10 * n))
         val n: Int = 2
@@ -196,7 +188,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val y1 = beaconInformation[beacon1][1]
         val y2 = beaconInformation[beacon2][1]
         val y3 = beaconInformation[beacon3][1]
-        var circle : Circle
         val valueA = (-2*x1) + (2*x2)
         val valueB = (-2*y1) + (2*y2)
         val valueC = (distance1*distance1) - (distance2*distance2) - (x1*x1) + (x2*x2) - (y1*y1) + (y2*y2)
@@ -205,27 +196,19 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val valueF = (distance2*distance2) - (distance3*distance3) - (x2*x2) + (x3*x3) - (y2*y2) + (y3*y3)
         val finalX = (((valueC*valueE) - (valueF*valueB))/((valueE*valueA)-(valueB*valueD)))
         val finalY = (((valueC*valueD)-(valueA*valueF))/((valueB*valueD)-(valueA*valueE)))
-//        circle = mMap.addCircle(CircleOptions()
-//                .center(LatLng(x1.toDouble(),y1.toDouble()))
-//                .radius(distance1)
-//                .strokeColor(Color.RED)
-//                .fillColor(Color.BLUE))
+
 
         val myLocation : LatLng = LatLng(finalX,finalY)
-        toast("MyLocation "+myLocation)
-        println("Mylocation->"+ myLocation)
-        println("ValueA->"+valueA)
-        println("ValueB->"+valueB)
-        println("ValueC->"+valueC)
-        println("ValueD->"+valueD)
-        println("ValueE->"+valueE)
-        println("ValueF->"+valueF)
-        println("FinalX->"+finalX)
-        println("FinalY->"+finalY)
-//        isMyLocation.remove()
+        isMyLocation.remove()
         isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation).title(count.toString()))
-//        toast("myLocation:"+myLocation)
+        toast("myLocation:"+myLocation)
         count += 1
+//        val distanceBP1 : Double = SphericalUtil.computeDistanceBetween(LatLng(x1.toDouble(),y1.toDouble()),myLocation)
+//        val distanceBP2 : Double = SphericalUtil.computeDistanceBetween(LatLng(x2.toDouble(),y2.toDouble()),myLocation)
+//        val distanceBP3 : Double = SphericalUtil.computeDistanceBetween(LatLng(x3.toDouble(),y3.toDouble()),myLocation)
+//        println("DataBP1->"+distanceBP1)
+//        println("DataBP2->"+distanceBP2)
+//        println("DataBP3->"+distanceBP3)
         setStartData()
     }
     fun setStartData(){
