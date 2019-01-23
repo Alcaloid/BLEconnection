@@ -9,6 +9,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
 import android.location.Location
+import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -22,8 +23,7 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import android.support.v4.app.ActivityCompat
-import com.google.maps.android.SphericalUtil
-import kotlinx.android.synthetic.main.activity_maps2.*
+
 
 class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -134,7 +134,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         if (canNavigator){
             mScanner = mBluetoothAdapter.bluetoothLeScanner
             addUUID()
-            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.CALLBACK_TYPE_ALL_MATCHES).build()
+            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.CALLBACK_TYPE_FIRST_MATCH).build()
             startScanner()
         }
     }
@@ -209,6 +209,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
 //        println("DataBP1->"+distanceBP1)
 //        println("DataBP2->"+distanceBP2)
 //        println("DataBP3->"+distanceBP3)
+
         setStartData()
     }
     fun setStartData(){
@@ -264,9 +265,9 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         mHandler.postDelayed({
             stopScanner()
             findMyLocation()
-        },10000)
+        },5000)
         mScanner.startScan(uidFilter,scanSetting,leScanCallBack)
-        mScanner.startScan(leScanCallBack)
+//        mScanner.startScan(leScanCallBack)
     }
     fun stopScanner(){
         mScanner.stopScan(leScanCallBack)

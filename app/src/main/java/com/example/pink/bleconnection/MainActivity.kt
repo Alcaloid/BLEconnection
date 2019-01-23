@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         var intent : Intent
         button_main.setOnClickListener {
-            intent = Intent(this, ScanBluetoothDevice::class.java)
+            intent = Intent(this, TestBLELibrary_1::class.java)
             startActivity(intent)
         }
         BLEbutton.setOnClickListener {
