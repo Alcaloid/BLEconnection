@@ -7,9 +7,7 @@ import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.graphics.Color
 import android.location.Location
-import android.os.Build
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -105,22 +103,24 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
      * installed Google Play services and returned to the app.
      */
     override fun onMapReady(googleMap: GoogleMap) {
-        mMap = googleMap
-        mMap.mapType = GoogleMap.MAP_TYPE_NONE
         val testingRoom = LatLngBounds(
                 LatLng(0.0, 0.0),
                 LatLng(15.0,11.0))
-        val testingMap = GroundOverlayOptions()
+        val mapGroundOverLay = GroundOverlayOptions()
                 .image(BitmapDescriptorFactory.fromResource(R.drawable.seniortesting))
                 .positionFromBounds(testingRoom).zIndex(1f)
         val locationZoom = LatLng(7.5,5.5)
         val cameraTraget = LatLngBounds(
                 LatLng(-0.01,-0.01), LatLng(16.0, 12.0))
-        mMap.addGroundOverlay(testingMap)
+
+        mMap = googleMap
+        mMap.mapType = GoogleMap.MAP_TYPE_NONE
+        mMap.addGroundOverlay(mapGroundOverLay)
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationZoom,5f))
         mMap.setLatLngBoundsForCameraTarget(cameraTraget)
         isMyLocation = mMap.addMarker(MarkerOptions().position(LatLng(-1000.0,-1000.0)).title("Mark"))
         mMap.uiSettings.isRotateGesturesEnabled = false
+        mMap.uiSettings.isMapToolbarEnabled = false
         mMap.setOnCameraChangeListener {
             val maxZoom = 8.0f;
             val minZoom = 5.0f
@@ -159,9 +159,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val distance2:Double = getDistance(R2,-60)
         val distance3:Double = getDistance(R3,-60)
         markLocation(0,1,2,distance1,distance2,distance3)
-//        drawCircle(0.0,0.0,distance1,Color.BLACK,Color.BLUE)
-//        drawCircle(15.0,0.0,distance2,Color.BLUE,Color.GREEN)
-//        drawCircle(15.0,11.0,distance3,Color.RED,Color.YELLOW)
 
     }
     private fun drawCircle(x:Double,y:Double,radius:Double,color1:Int,color2:Int){
@@ -176,12 +173,10 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         //d = 10 ^ ((TxPower - RSSI) / (10 * n))
         val n: Int = 2
         val distance : Double = Math.pow(10.0,((txPower-rssi)/(10.0*n)))
-        println("RSSI is "+rssi)
-        println("txPower is "+ txPower)
-        println("Distance is "+ distance)
+        println("Distance:"+distance)
         return distance
     }
-    fun markLocation(beacon1:Int, beacon2:Int, beacon3:Int,distance1:Double,distance2:Double,distance3:Double){
+    private fun markLocation(beacon1:Int, beacon2:Int, beacon3:Int,distance1:Double,distance2:Double,distance3:Double){
         val x1 = beaconInformation[beacon1][0]
         val x2 = beaconInformation[beacon2][0]
         val x3 = beaconInformation[beacon3][0]
@@ -196,20 +191,11 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val valueF = (distance2*distance2) - (distance3*distance3) - (x2*x2) + (x3*x3) - (y2*y2) + (y3*y3)
         val finalX = (((valueC*valueE) - (valueF*valueB))/((valueE*valueA)-(valueB*valueD)))
         val finalY = (((valueC*valueD)-(valueA*valueF))/((valueB*valueD)-(valueA*valueE)))
-
-
         val myLocation : LatLng = LatLng(finalX,finalY)
+
         isMyLocation.remove()
         isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation).title(count.toString()))
-        toast("myLocation:"+myLocation)
         count += 1
-//        val distanceBP1 : Double = SphericalUtil.computeDistanceBetween(LatLng(x1.toDouble(),y1.toDouble()),myLocation)
-//        val distanceBP2 : Double = SphericalUtil.computeDistanceBetween(LatLng(x2.toDouble(),y2.toDouble()),myLocation)
-//        val distanceBP3 : Double = SphericalUtil.computeDistanceBetween(LatLng(x3.toDouble(),y3.toDouble()),myLocation)
-//        println("DataBP1->"+distanceBP1)
-//        println("DataBP2->"+distanceBP2)
-//        println("DataBP3->"+distanceBP3)
-
         setStartData()
     }
     fun setStartData(){
@@ -224,7 +210,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         for (i in 0..beaconSignal.size-1){
             averageSignal[i] = findAverage(beaconSignal[i])
             if (averageSignal[i]!= -100000) {
-//                println("Beacon:"+dataDistance[i][0]+"->average:"+averageSignal[i]+" Txpower:"+beaconInformation[i][2])
                 println("Beacon is "+dataDistance[i][0])
                 dataDistance[i][1] = getDistance(averageSignal[i],beaconInformation[i][2])
             }
