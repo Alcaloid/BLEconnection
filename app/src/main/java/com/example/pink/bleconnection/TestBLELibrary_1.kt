@@ -20,17 +20,17 @@ class TestBLELibrary_1 : AppCompatActivity(){
         scanner = BluetoothLeScannerCompat.getScanner()
         val settings = ScanSettings.Builder()
                 .setLegacy(false)
-                .setScanMode(ScanSettings.CALLBACK_TYPE_FIRST_MATCH)
+                .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
                 .setUseHardwareBatchingIfSupported(false).build()
-        val filters : ArrayList<ScanFilter> = arrayListOf()
-        filters.add(ScanFilter.Builder().setDeviceAddress("DC:0B:D4:DF:34:7E").build())
-        filters.add(ScanFilter.Builder().setDeviceAddress("D3:D8:8B:93:D5:D1").build())
-        filters.add(ScanFilter.Builder().setDeviceAddress("E9:56:E4:39:C9:47").build())
-        filters.add(ScanFilter.Builder().setDeviceAddress("CD:03:D7:B1:12:96").build())
+//        val filters : ArrayList<ScanFilter> = arrayListOf()
+//        filters.add(ScanFilter.Builder().setDeviceAddress("DC:0B:D4:DF:34:7E").build())
+//        filters.add(ScanFilter.Builder().setDeviceAddress("D3:D8:8B:93:D5:D1").build())
+//        filters.add(ScanFilter.Builder().setDeviceAddress("E9:56:E4:39:C9:47").build())
+//        filters.add(ScanFilter.Builder().setDeviceAddress("CD:03:D7:B1:12:96").build())
         start_button.setOnClickListener {
             Toast.makeText(this,"Start",Toast.LENGTH_SHORT).show()
 //            scanner.startScan(scanCallback)
-            scanner.startScan(filters, settings, scanCallback)
+            scanner.startScan(null, settings, scanCallback)
         }
         stop_button.setOnClickListener {
             scanner.stopScan(scanCallback)
@@ -50,6 +50,7 @@ class TestBLELibrary_1 : AppCompatActivity(){
         reset_button.setOnClickListener {
             reset()
         }
+        showListView("0")
     }
 
     private var scanCallback = object : ScanCallback(){

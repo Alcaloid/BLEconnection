@@ -133,8 +133,8 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
 //        makeUpData(-60,-840,-1080)
         if (canNavigator){
             mScanner = mBluetoothAdapter.bluetoothLeScanner
-            addUUID()
-            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.CALLBACK_TYPE_FIRST_MATCH).build()
+//            addUUID()
+            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
             startScanner()
         }
     }
@@ -251,7 +251,8 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             stopScanner()
             findMyLocation()
         },5000)
-        mScanner.startScan(uidFilter,scanSetting,leScanCallBack)
+        mScanner.startScan(null,scanSetting,leScanCallBack)
+//        mScanner.startScan(uidFilter,scanSetting,leScanCallBack)
 //        mScanner.startScan(leScanCallBack)
     }
     fun stopScanner(){
