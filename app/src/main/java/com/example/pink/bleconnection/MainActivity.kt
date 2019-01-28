@@ -27,7 +27,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         mapbutton.setOnClickListener {
-            intent = Intent(this, MapActivity::class.java)
+            intent = Intent(this, SearchSystemActivity::class.java)
             startActivity(intent)
         }
         googlemap_buttom.setOnClickListener {

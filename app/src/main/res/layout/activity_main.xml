@@ -32,7 +32,8 @@
         android:id="@+id/mapbutton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Map" />
+        android:text="Search"
+        android:textAllCaps="false" />
 
     <Button
         android:id="@+id/googlemap_buttom"
