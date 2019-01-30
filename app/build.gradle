@@ -33,6 +33,8 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.2'
     //BLE Library
     implementation 'no.nordicsemi.android.support.v18:scanner:1.2.0'
+    //Serach
+    implementation 'com.github.mancj:MaterialSearchBar:0.8.2'
 
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
     testImplementation 'junit:junit:4.12'
