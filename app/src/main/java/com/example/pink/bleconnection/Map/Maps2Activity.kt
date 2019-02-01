@@ -7,6 +7,7 @@ import android.bluetooth.le.*
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -21,7 +22,12 @@ import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
 import android.support.v4.app.ActivityCompat
-
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
+import kotlinx.android.synthetic.main.activity_maps2.*
 
 class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -53,7 +59,11 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             arrayListOf(),
             arrayListOf()
     )
+    private var placeName : ArrayList<String> = arrayListOf(
+            "Bioticle","Manasan","Biotication","Popochan","IwantToCry","Alcaloidsan","Action"
+    )
     private var uidFilter : ArrayList<ScanFilter> = arrayListOf()
+    var searchMarker : Marker? = null
     var canNavigator : Boolean = false
     var tmp : DoubleArray = doubleArrayOf()
     var lastLocationloc: Location? = null
@@ -78,7 +88,35 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             mBluetoothAdapter = mBluetoothManager.adapter
         }
         mapFragment.getMapAsync(this)
+
+        val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, placeName)
+        mListPlaceName.setAdapter(adapter)
+//        editText_searchroom_map.isFocusable = false
+        editText_searchroom_map.setOnClickListener {
+//            editText_searchroom_map.isFocusable = true
+            searchBackground.setBackgroundResource(R.color.angel_white)
+            mListPlaceName.visibility = View.VISIBLE
+        }
+        editText_searchroom_map.addTextChangedListener(object : TextWatcher{
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                adapter.getFilter().filter(s)
+            }
+
+        })
+        button_searchroom.setOnClickListener {
+            mListPlaceName.visibility = View.GONE
+//            editText_searchroom_map.isFocusable = false
+            colseSoftKeyboard()
+            searchBackground.setBackgroundColor(0x00000000)
+            checkSearch(editText_searchroom_map.text.toString())
+        }
+        mListPlaceName.setOnItemClickListener { parent, view, position, id ->
+            editText_searchroom_map.setText(placeName[position])
+        }
     }
+
     override fun onResume() {
         super.onResume()
         val locationPermissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
@@ -130,19 +168,16 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(minZoom))
             }
         }
-//        makeUpData(-60,-840,-1080)
         if (canNavigator){
             mScanner = mBluetoothAdapter.bluetoothLeScanner
-//            addUUID()
             scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
             startScanner()
         }
     }
-
     private var leScanCallBack = object : ScanCallback(){
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
-            println("GetData->"+result.device.name+" Address:"+result.device.address)
+//            println("GetData->"+result.device.name+" Address:"+result.device.address)
             if(result.device.name == "RL0"){
                 beaconSignal[0].add(result.rssi)
             }else if (result.device.name == "RL1"){
@@ -154,26 +189,11 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
-    private fun makeUpData(R1:Int,R2:Int,R3:Int){
-        val distance1:Double = getDistance(R1,-60)
-        val distance2:Double = getDistance(R2,-60)
-        val distance3:Double = getDistance(R3,-60)
-        markLocation(0,1,2,distance1,distance2,distance3)
-
-    }
-    private fun drawCircle(x:Double,y:Double,radius:Double,color1:Int,color2:Int){
-        mMap.addCircle(CircleOptions()
-                .center(LatLng(x,y))
-                .radius(radius)
-                .zIndex(0f)
-                .strokeColor(color1)
-                .fillColor(color2))
-    }
     private fun getDistance(rssi: Int,txPower:Int):Double{
         //d = 10 ^ ((TxPower - RSSI) / (10 * n))
         val n: Int = 2
         val distance : Double = Math.pow(10.0,((txPower-rssi)/(10.0*n)))
-        println("Distance:"+distance)
+//        println("Distance:"+distance)
         return distance
     }
     private fun markLocation(beacon1:Int, beacon2:Int, beacon3:Int,distance1:Double,distance2:Double,distance3:Double){
@@ -210,7 +230,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         for (i in 0..beaconSignal.size-1){
             averageSignal[i] = findAverage(beaconSignal[i])
             if (averageSignal[i]!= -100000) {
-                println("Beacon is "+dataDistance[i][0])
+//                println("Beacon is "+dataDistance[i][0])
                 dataDistance[i][1] = getDistance(averageSignal[i],beaconInformation[i][2])
             }
         }
@@ -252,24 +272,44 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             findMyLocation()
         },5000)
         mScanner.startScan(null,scanSetting,leScanCallBack)
-//        mScanner.startScan(uidFilter,scanSetting,leScanCallBack)
-//        mScanner.startScan(leScanCallBack)
     }
     fun stopScanner(){
         mScanner.stopScan(leScanCallBack)
     }
+    fun checkSearch(string: String){
+        val buff = string.toLowerCase()
+        println("String:"+buff)
+        when(buff){
+            "zonea" -> markSearchRoom(LatLng(3.75,2.75),"ZoneA")
+            "zoneb" -> markSearchRoom(LatLng(11.25,2.75),"ZoneB")
+            "zonec" -> markSearchRoom(LatLng(3.75,8.25),"ZoneC")
+            "zoned" -> markSearchRoom(LatLng(11.25,8.25),"ZoneD")
+            else -> {
+                if (searchMarker != null) searchMarker?.remove()
+                toast("Doesn't found room")
+            }
+        }
+    }
+    fun markSearchRoom(roomPosition : LatLng,roomName : String){
+        if (searchMarker == null){
+            searchMarker = mMap.addMarker(MarkerOptions().position(roomPosition).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title(roomName))
+        }else{
+            searchMarker?.remove()
+            searchMarker = mMap.addMarker(MarkerOptions().position(roomPosition).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title(roomName))
+        }
+        mMap.addPolygon(PolygonOptions().add())
+    }
     fun toast(text : String){
         Toast.makeText(this,text, Toast.LENGTH_SHORT).show()
     }
-    fun addUUID(){
-        uidFilter.add(ScanFilter.Builder().setDeviceAddress("DC:0B:D4:DF:34:7E").build())
-        uidFilter.add(ScanFilter.Builder().setDeviceAddress("D3:D8:8B:93:D5:D1").build())
-        uidFilter.add(ScanFilter.Builder().setDeviceAddress("E9:56:E4:39:C9:47").build())
-        uidFilter.add(ScanFilter.Builder().setDeviceAddress("CD:03:D7:B1:12:96").build())
+    fun colseSoftKeyboard(){
+        val inputManager: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        inputManager.hideSoftInputFromWindow(currentFocus?.windowToken, InputMethodManager.SHOW_FORCED)
     }
     override fun onDestroy() {
         super.onDestroy()
         mScanner.stopScan(leScanCallBack)
     }
+
 
 }

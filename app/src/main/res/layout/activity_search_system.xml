@@ -12,28 +12,29 @@
         android:id="@+id/searchBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:animateLayoutChanges="false"
+        android:clickable="false"
+        android:visibility="gone"
         app:mt_hint="Serach Room"
-        app:mt_maxSuggestionsCount="10"
-        app:mt_speechMode="false" />
+        app:mt_maxSuggestionsCount="0"
+        app:mt_speechMode="false">
 
-    <RelativeLayout
+    </com.mancj.materialsearchbar.MaterialSearchBar>
+
+    <EditText
+        android:id="@+id/editText_search"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:hint="Search Room"
+        android:inputType="text" />
 
-        <ImageView
-            android:id="@+id/imageView"
-            android:layout_width="243dp"
-            android:layout_height="242dp"
-            android:layout_marginStart="75dp"
-            android:layout_marginTop="183dp"
-            android:src="@drawable/common_google_signin_btn_icon_dark"/>
+    <ListView
+        android:id="@+id/mListView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        >
+    </ListView>
 
-        <ListView
-            android:id="@+id/mListView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="invisible">
-        </ListView>
-
-    </RelativeLayout>
 </LinearLayout>
