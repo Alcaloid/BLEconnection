@@ -28,7 +28,16 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:background="@color/cardview_light_background"
-            android:orientation="horizontal">
+            android:orientation="horizontal"
+            android:visibility="gone">
+
+            <ImageButton
+                android:id="@+id/button_back"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:background="@null"
+                app:srcCompat="@drawable/ic_chevron_left_black_24dp" />
 
             <EditText
                 android:id="@+id/editText_searchroom_map"
@@ -52,20 +61,6 @@
                 android:textAllCaps="false" />
         </LinearLayout>
 
-        <com.mancj.materialsearchbar.MaterialSearchBar
-            android:id="@+id/searchBar_map"
-            style="@style/MaterialSearchBarLight"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="false"
-            android:focusable="false"
-            android:padding="20dp"
-            android:visibility="gone"
-            app:mt_hint="Search Room"
-            app:mt_maxSuggestionsCount="0">
-
-        </com.mancj.materialsearchbar.MaterialSearchBar>
-
         <ListView
             android:id="@+id/mListPlaceName"
             android:layout_width="match_parent"
@@ -76,14 +71,14 @@
 
     <ImageButton
         android:id="@+id/searchImageButton"
-        android:layout_width="44dp"
-        android:layout_height="46dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_marginEnd="10dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="8dp"
         android:background="@drawable/round_button"
         android:src="@drawable/ic_search_black_24dp"
-        android:visibility="gone" />
+        android:visibility="visible" />
 
 </RelativeLayout>

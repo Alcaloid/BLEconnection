@@ -25,6 +25,7 @@ import android.support.v4.app.ActivityCompat
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.animation.Transformation
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.activity_maps2.*
@@ -91,9 +92,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
 
         val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, placeName)
         mListPlaceName.setAdapter(adapter)
-//        editText_searchroom_map.isFocusable = false
         editText_searchroom_map.setOnClickListener {
-//            editText_searchroom_map.isFocusable = true
             searchBackground.setBackgroundResource(R.color.angel_white)
             mListPlaceName.visibility = View.VISIBLE
         }
@@ -106,11 +105,17 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
 
         })
         button_searchroom.setOnClickListener {
-            mListPlaceName.visibility = View.GONE
-//            editText_searchroom_map.isFocusable = false
             colseSoftKeyboard()
-            searchBackground.setBackgroundColor(0x00000000)
-            checkSearch(editText_searchroom_map.text.toString())
+            colseSearchTab()
+        }
+        button_back.setOnClickListener {
+            colseSoftKeyboard()
+            colseSearchTab()
+        }
+        searchImageButton.setOnClickListener {
+            searchBarTab.visibility = View.VISIBLE
+//            searchImageButton.animation.getTransformation(10, Transformation())
+            searchImageButton.visibility = View.GONE
         }
         mListPlaceName.setOnItemClickListener { parent, view, position, id ->
             editText_searchroom_map.setText(placeName[position])
@@ -297,7 +302,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             searchMarker?.remove()
             searchMarker = mMap.addMarker(MarkerOptions().position(roomPosition).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title(roomName))
         }
-        mMap.addPolygon(PolygonOptions().add())
     }
     fun toast(text : String){
         Toast.makeText(this,text, Toast.LENGTH_SHORT).show()
@@ -305,6 +309,13 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     fun colseSoftKeyboard(){
         val inputManager: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputManager.hideSoftInputFromWindow(currentFocus?.windowToken, InputMethodManager.SHOW_FORCED)
+    }
+    fun colseSearchTab(){
+        mListPlaceName.visibility = View.GONE
+        searchBarTab.visibility = View.GONE
+        searchImageButton.visibility = View.VISIBLE
+        searchBackground.setBackgroundColor(0x00000000)
+        checkSearch(editText_searchroom_map.text.toString())
     }
     override fun onDestroy() {
         super.onDestroy()
