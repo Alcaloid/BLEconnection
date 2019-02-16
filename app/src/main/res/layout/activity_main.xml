@@ -2,6 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/contaner"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -18,8 +19,8 @@
         android:id="@+id/BLEbutton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:layout_marginTop="60dp"
+        android:layout_marginEnd="16dp"
         android:text="BLE" />
 
     <Button
@@ -40,4 +41,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="GoogleMap" />
+
+    <Button
+        android:id="@+id/fragment_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Mapfragemnt" />
 </LinearLayout>

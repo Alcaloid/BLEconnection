@@ -1,13 +1,17 @@
 package com.example.pink.bleconnection.Map
 
+import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
+import android.content.Context
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 
 import com.example.pink.bleconnection.R
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -18,6 +22,11 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.GroundOverlayOptions
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.LatLngBounds
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.MultiplePermissionsReport
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener
 
 class MapFragment : Fragment(), OnMapReadyCallback {
 
@@ -28,12 +37,14 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_map, container, false)
+        mBluetoothManager = activity?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        mBluetoothAdapter = mBluetoothManager.adapter
         return view
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        val mapFragment = childFragmentManager.findFragmentById(R.id.mapview) as SupportMapFragment?;
-        mapFragment?.getMapAsync(this)
+        val mapFragment = childFragmentManager.findFragmentById(R.id.mapview) as SupportMapFragment
+        mapFragment.getMapAsync(this)
     }
     override fun onMapReady(googleMap: GoogleMap) {
         val testingRoom = LatLngBounds(
@@ -61,17 +72,35 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(minZoom))
             }
         }
+        checkPermission()
     }
-    /*private lateinit var mMap: GoogleMap
-    var mapView: MapView? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_map, container, false)
-        val mapFragment = childFragmentManager.findFragmentById(R.id.mapview) as SupportMapFragment?;
-        mapFragment?.getMapAsync(OnMapReadyCallback {
+    private fun checkPermission(){
+        if(activity?.packageManager!!.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
+            Dexter.withActivity(activity)
+                    .withPermissions(
+                            BluetoothAdapter.ACTION_REQUEST_ENABLE,
+                            Manifest.permission.ACCESS_COARSE_LOCATION
+                    ).withListener(object : MultiplePermissionsListener{
+                        override fun onPermissionsChecked(report: MultiplePermissionsReport) {
+                            if (report.areAllPermissionsGranted()){
+                                //startscan
+                            }
+                            if (report.isAnyPermissionPermanentlyDenied()) {
+                                toast("Navigator System need both of permission")
+                            }
+                        }
+                        override fun onPermissionRationaleShouldBeShown(permissions: MutableList<PermissionRequest>?, token: PermissionToken) {
+                            token.continuePermissionRequest()
+                        }
 
-        })
-        //supportFragmentManager.findFragmentById(R.id.mapview) as SupportMapFragment
-        return view
-    }*/
+                    })
+        }else{
+            toast("This Device can't support BLE")
+        }
+    }
+
+    fun toast(text : String){
+        Toast.makeText(context,text, Toast.LENGTH_SHORT).show()
+    }
 }
