@@ -29,14 +29,15 @@ dependencies {
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
     implementation "com.android.support:support-compat:28.0.0"
 
-    //gson
-    implementation 'com.google.code.gson:gson:2.8.2'
     //BLE Library
     implementation 'no.nordicsemi.android.support.v18:scanner:1.2.0'
     //Serach
     implementation 'com.github.mancj:MaterialSearchBar:0.8.2'
+    //dexter
+    implementation 'com.karumi:dexter:5.0.0'
 
     implementation 'com.google.android.gms:play-services-maps:16.0.0'
+    implementation 'com.android.support:support-v4:28.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
