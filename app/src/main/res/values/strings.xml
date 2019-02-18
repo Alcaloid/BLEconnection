@@ -2,7 +2,8 @@
     <string name="app_name">BLEconnection</string>
     <string name="title_activity_maps2">Map</string>
     <string name="edittext_hint_search">Search Room</string>
-    <string name="button_searchtext">Search</string>
+    <string name="button_searchtext">Search here</string>
+    <string name="button_back">back</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

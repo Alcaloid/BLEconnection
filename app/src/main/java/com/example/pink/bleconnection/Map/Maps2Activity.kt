@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Color
-import android.location.Location
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
@@ -25,7 +24,6 @@ import android.support.v4.app.ActivityCompat
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.view.animation.Transformation
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import kotlinx.android.synthetic.main.activity_maps2.*
@@ -61,15 +59,14 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             arrayListOf()
     )
     private var placeName : ArrayList<String> = arrayListOf(
-            "Bioticle","Manasan","Biotication","Popochan","IwantToCry","Alcaloidsan","Action"
+            "ZoneA","ZoneB","ZoneC","ZoneD"
     )
     private var uidFilter : ArrayList<ScanFilter> = arrayListOf()
     var searchMarker : Marker? = null
     var canNavigator : Boolean = false
     var tmp : DoubleArray = doubleArrayOf()
-    var lastLocationloc: Location? = null
-    var startLocation : Location? = null
     var count : Int = 0
+    var focusMap : Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -78,6 +75,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
                 .findFragmentById(R.id.map) as SupportMapFragment
         mHandler = Handler()
+        var buff : String = ""
         if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             canNavigator = true
         }else{
@@ -92,33 +90,40 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
 
         val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, placeName)
         mListPlaceName.setAdapter(adapter)
-        editText_searchroom_map.setOnClickListener {
-            searchBackground.setBackgroundResource(R.color.angel_white)
+
+        button_map_start_search.setOnClickListener {
+            searchBackground.setBackgroundColor(resources.getColor(R.color.angel_white))
+            search_font.visibility = View.GONE
+            search_backend.visibility = View.VISIBLE
             mListPlaceName.visibility = View.VISIBLE
         }
-        editText_searchroom_map.addTextChangedListener(object : TextWatcher{
-            override fun afterTextChanged(s: Editable?) {}
-            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                adapter.getFilter().filter(s)
+        button_map_cloesr.setOnClickListener {
+            searchBackground.setBackgroundColor(Color.TRANSPARENT)
+            buff = editText_search_place.text.toString()
+            if (!buff.equals("")){
+                checkSearch(buff)
             }
-
+            mListPlaceName.visibility = View.GONE
+            search_backend.visibility = View.GONE
+            search_font.visibility = View.VISIBLE
+        }
+        editText_search_place.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int){}
+            override fun onTextChanged(str: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                adapter.filter.filter(str)
+            }
         })
-        button_searchroom.setOnClickListener {
-            colseSoftKeyboard()
-            colseSearchTab()
-        }
-        button_back.setOnClickListener {
-            colseSoftKeyboard()
-            colseSearchTab()
-        }
-        searchImageButton.setOnClickListener {
-            searchBarTab.visibility = View.VISIBLE
-//            searchImageButton.animation.getTransformation(10, Transformation())
-            searchImageButton.visibility = View.GONE
-        }
         mListPlaceName.setOnItemClickListener { parent, view, position, id ->
-            editText_searchroom_map.setText(placeName[position])
+            editText_search_place.setText(placeName[position])
+        }
+        searchBackground.setOnClickListener {
+            if (focusMap){
+                search_background.visibility = View.VISIBLE
+            }else{
+                search_background.visibility = View.GONE
+            }
+            focusMap = !focusMap
         }
     }
 
@@ -283,7 +288,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     }
     fun checkSearch(string: String){
         val buff = string.toLowerCase()
-        println("String:"+buff)
         when(buff){
             "zonea" -> markSearchRoom(LatLng(3.75,2.75),"ZoneA")
             "zoneb" -> markSearchRoom(LatLng(11.25,2.75),"ZoneB")
@@ -309,13 +313,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     fun colseSoftKeyboard(){
         val inputManager: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         inputManager.hideSoftInputFromWindow(currentFocus?.windowToken, InputMethodManager.SHOW_FORCED)
-    }
-    fun colseSearchTab(){
-        mListPlaceName.visibility = View.GONE
-        searchBarTab.visibility = View.GONE
-        searchImageButton.visibility = View.VISIBLE
-        searchBackground.setBackgroundColor(0x00000000)
-        checkSearch(editText_searchroom_map.text.toString())
     }
     override fun onDestroy() {
         super.onDestroy()

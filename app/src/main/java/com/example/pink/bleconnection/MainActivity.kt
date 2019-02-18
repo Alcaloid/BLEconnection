@@ -3,9 +3,7 @@ package com.example.pink.bleconnection
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.v4.app.Fragment
 import com.example.pink.bleconnection.BLEScanner.BluetoothReciveRSSIActivity
-import com.example.pink.bleconnection.Map.MapActivity
 import com.example.pink.bleconnection.Map.MapFragment
 import com.example.pink.bleconnection.Map.Maps2Activity
 import kotlinx.android.synthetic.main.activity_main.*
