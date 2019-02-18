@@ -1,10 +1,12 @@
 package com.example.pink.bleconnection.Map
 
 import android.Manifest
+import android.app.Activity
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
 import android.bluetooth.le.BluetoothLeScanner
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.support.v4.app.Fragment
@@ -25,8 +27,11 @@ import com.google.android.gms.maps.model.LatLngBounds
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.MultiplePermissionsReport
 import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionDeniedResponse
+import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener
+import com.karumi.dexter.listener.single.PermissionListener
 
 class MapFragment : Fragment(), OnMapReadyCallback {
 
@@ -77,24 +82,23 @@ class MapFragment : Fragment(), OnMapReadyCallback {
 
     private fun checkPermission(){
         if(activity?.packageManager!!.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
-            Dexter.withActivity(activity)
-                    .withPermissions(
-                            BluetoothAdapter.ACTION_REQUEST_ENABLE,
-                            Manifest.permission.ACCESS_COARSE_LOCATION
-                    ).withListener(object : MultiplePermissionsListener{
-                        override fun onPermissionsChecked(report: MultiplePermissionsReport) {
-                            if (report.areAllPermissionsGranted()){
-                                //startscan
-                            }
-                            if (report.isAnyPermissionPermanentlyDenied()) {
-                                toast("Navigator System need both of permission")
-                            }
+            if (!mBluetoothAdapter.isEnabled){
+                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                startActivityForResult(enableBtIntent, 1)
+            }
+            Dexter.withActivity(context as Activity)
+                    .withPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+                    .withListener(object : PermissionListener {
+                        override fun onPermissionGranted(response: PermissionGrantedResponse?) {
+                            mScanner = mBluetoothAdapter.bluetoothLeScanner
                         }
-                        override fun onPermissionRationaleShouldBeShown(permissions: MutableList<PermissionRequest>?, token: PermissionToken) {
+                        override fun onPermissionDenied(response: PermissionDeniedResponse?) {
+                            toast("Navigator system need location permission")
+                        }
+                        override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest, token: PermissionToken) {
                             token.continuePermissionRequest()
                         }
-
-                    })
+                    }).check()
         }else{
             toast("This Device can't support BLE")
         }

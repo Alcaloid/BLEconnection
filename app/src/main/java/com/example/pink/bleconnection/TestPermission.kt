@@ -23,55 +23,41 @@ import android.support.v7.app.AlertDialog
 
 
 class TestPermission : AppCompatActivity(){
-
+    lateinit var mBluetoothManager : BluetoothManager
+    lateinit var mBluetoothAdapter : BluetoothAdapter
+    lateinit var mScanner : BluetoothLeScanner
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_notification)
-        toast("Start")
-        val dialogMultiplePermissionsReport = DialogOnAnyDeniedMultiplePermissionsListener
-                .Builder
-                .withContext(this)
-                .withTitle("Bluetooth & Location")
-                .withMessage("Navigator system need bluetooth and location")
-                .withButtonText("Ok")
-                .build()
+
+        mBluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        mBluetoothAdapter = mBluetoothManager.adapter
         Dexter.withActivity(this)
                 .withPermissions(
                         Manifest.permission.ACCESS_COARSE_LOCATION
-                        //BluetoothAdapter.ACTION_REQUEST_ENABLE,
-                        //Manifest.permission.ACCESS_COARSE_LOCATION
                 ).withListener(object : MultiplePermissionsListener {
                     override fun onPermissionsChecked(report: MultiplePermissionsReport) {
                         if (report.areAllPermissionsGranted()) {
                             // do you work now
+                            mScanner = mBluetoothAdapter.bluetoothLeScanner
                             toast("It's work")
-                            //bluetoothScanner = bluetoothAdapter.bluetoothLeScanner
+//                            bluetoothScanner = bluetoothAdapter.bluetoothLeScanner
                         }
                         // check for permanent denial of any permission
                         if (report.isAnyPermissionPermanentlyDenied()) {
                             // permission is denied permenantly, navigate user to app settings
                             toast("Navigator System need both of permission")
-                            //showSettingsDialog()
                         }
                     }
                     override fun onPermissionRationaleShouldBeShown(permissions: MutableList<PermissionRequest>?, token: PermissionToken) {
                         toast("Get permission")
+                        if (!mBluetoothAdapter.isEnabled){
+                            val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                            startActivityForResult(enableBtIntent, 1)
+                        }
                         token.continuePermissionRequest()
                     }
                 }).check()
-    }
-
-    private fun showSettingsDialog() {
-        val dialog = AlertDialog.Builder(this).setTitle("Alert")
-                .setMessage("Need Permission")
-                .setPositiveButton("OK"
-                ) { _, _ ->
-                    startPermission()
-                }
-        dialog.show()
-    }
-    fun startPermission(){
-        ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),1)
     }
     fun toast(text : String){
         Toast.makeText(this,text, Toast.LENGTH_SHORT).show()

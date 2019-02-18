@@ -26,6 +26,12 @@ import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionDeniedResponse
+import com.karumi.dexter.listener.PermissionGrantedResponse
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.single.PermissionListener
 import kotlinx.android.synthetic.main.activity_maps2.*
 
 class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
@@ -74,30 +80,44 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
                 .findFragmentById(R.id.map) as SupportMapFragment
-        mHandler = Handler()
         var buff : String = ""
-        if (getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
-            canNavigator = true
+        mHandler = Handler()
+        mBluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        mBluetoothAdapter = mBluetoothManager.adapter
+
+        if(packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
+            if (!mBluetoothAdapter.isEnabled){
+                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                startActivityForResult(enableBtIntent, 1)
+            }
+            Dexter.withActivity(this)
+                    .withPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+                    .withListener(object : PermissionListener {
+                        override fun onPermissionGranted(response: PermissionGrantedResponse?) {
+                            mScanner = mBluetoothAdapter.bluetoothLeScanner
+                            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
+                            startScanner()
+                        }
+                        override fun onPermissionDenied(response: PermissionDeniedResponse?) {
+                            toast("Navigator system need location permission")
+                        }
+                        override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest, token: PermissionToken) {
+                            token.continuePermissionRequest()
+                        }
+                    }).check()
         }else{
-            canNavigator = false
-            toast("This Device can't support BLE")
-        }
-        if (canNavigator){
-            mBluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-            mBluetoothAdapter = mBluetoothManager.adapter
+            toast("This Device can't use navigator")
         }
         mapFragment.getMapAsync(this)
-
         val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, placeName)
         mListPlaceName.setAdapter(adapter)
-
         button_map_start_search.setOnClickListener {
             searchBackground.setBackgroundColor(resources.getColor(R.color.angel_white))
             search_font.visibility = View.GONE
             search_backend.visibility = View.VISIBLE
             mListPlaceName.visibility = View.VISIBLE
         }
-        button_map_cloesr.setOnClickListener {
+        button_search_closer.setOnClickListener {
             searchBackground.setBackgroundColor(Color.TRANSPARENT)
             buff = editText_search_place.text.toString()
             if (!buff.equals("")){
@@ -117,30 +137,16 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         mListPlaceName.setOnItemClickListener { parent, view, position, id ->
             editText_search_place.setText(placeName[position])
         }
-        searchBackground.setOnClickListener {
+        /*searchBackground.setOnClickListener {
             if (focusMap){
                 search_background.visibility = View.VISIBLE
             }else{
                 search_background.visibility = View.GONE
             }
             focusMap = !focusMap
-        }
+        }*/
     }
 
-    override fun onResume() {
-        super.onResume()
-        val locationPermissionCheck = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION)
-        val REQUEST_ENABLE_BT :Int = 1
-        if(canNavigator){
-            if (!mBluetoothAdapter.isEnabled){
-                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT)
-            }
-            if (locationPermissionCheck!=0){
-                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.ACCESS_COARSE_LOCATION),REQUEST_ENABLE_BT)
-            }
-        }
-    }
     /**
      * Manipulates the map once available.
      * This callback is triggered when the map is ready to be used.
@@ -178,16 +184,11 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(minZoom))
             }
         }
-        if (canNavigator){
-            mScanner = mBluetoothAdapter.bluetoothLeScanner
-            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
-            startScanner()
-        }
     }
     private var leScanCallBack = object : ScanCallback(){
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
-//            println("GetData->"+result.device.name+" Address:"+result.device.address)
+            println("GetData->"+result.device.name+" Address:"+result.device.address)
             if(result.device.name == "RL0"){
                 beaconSignal[0].add(result.rssi)
             }else if (result.device.name == "RL1"){
@@ -318,6 +319,4 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         super.onDestroy()
         mScanner.stopScan(leScanCallBack)
     }
-
-
 }

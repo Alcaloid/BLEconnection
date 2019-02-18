@@ -3,6 +3,7 @@ package com.example.pink.bleconnection
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.view.View
 import com.example.pink.bleconnection.BLEScanner.BluetoothReciveRSSIActivity
 import com.example.pink.bleconnection.Map.MapFragment
 import com.example.pink.bleconnection.Map.Maps2Activity
@@ -38,6 +39,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         fragment_button.setOnClickListener {
+            button_list.visibility = View.GONE
             fragmentTan.add(R.id.contaner,fragment)
             fragmentTan.commit()
         }

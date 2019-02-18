@@ -8,43 +8,53 @@
     android:orientation="vertical"
     tools:context=".MainActivity">
 
-    <Button
-        android:id="@+id/button_main"
+    <LinearLayout
+        android:id="@+id/button_list"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:text="Bluetooth" />
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/BLEbutton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="60dp"
-        android:layout_marginEnd="16dp"
-        android:text="BLE" />
+        <Button
+            android:id="@+id/button_main"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="Bluetooth" />
 
-    <Button
-        android:id="@+id/notiButton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Noti" />
+        <Button
+            android:id="@+id/BLEbutton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="60dp"
+            android:layout_marginEnd="16dp"
+            android:text="BLE" />
 
-    <Button
-        android:id="@+id/mapbutton"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Search"
-        android:textAllCaps="false" />
+        <Button
+            android:id="@+id/notiButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Noti" />
 
-    <Button
-        android:id="@+id/googlemap_buttom"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="GoogleMap" />
+        <Button
+            android:id="@+id/mapbutton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Search"
+            android:textAllCaps="false" />
 
-    <Button
-        android:id="@+id/fragment_button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Mapfragemnt" />
+        <Button
+            android:id="@+id/googlemap_buttom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="GoogleMap" />
+
+        <Button
+            android:id="@+id/fragment_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Mapfragemnt" />
+
+    </LinearLayout>
+
+
 </LinearLayout>
