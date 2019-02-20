@@ -40,10 +40,8 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     lateinit var mBluetoothManager : BluetoothManager
     lateinit var mBluetoothAdapter : BluetoothAdapter
     lateinit var mScanner : BluetoothLeScanner
-    lateinit var isMyLocation : Marker
     lateinit var mHandler: Handler
     lateinit var scanSetting : ScanSettings
-
     private var beaconInformation : Array<IntArray> = arrayOf(
             //0,1 is x,y and 2 is txpower
             intArrayOf(0,0,-64), // beacon0
@@ -67,9 +65,10 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     private var placeName : ArrayList<String> = arrayListOf(
             "ZoneA","ZoneB","ZoneC","ZoneD"
     )
-    private var uidFilter : ArrayList<ScanFilter> = arrayListOf()
+    private var isMyLocation : Marker? = null
+    private var myLocation : LatLng? = null
+    private var polyLine : Polyline? = null
     var searchMarker : Marker? = null
-    var canNavigator : Boolean = false
     var tmp : DoubleArray = doubleArrayOf()
     var count : Int = 0
     var focusMap : Boolean = false
@@ -81,34 +80,8 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
                 .findFragmentById(R.id.map) as SupportMapFragment
         var buff : String = ""
-        mHandler = Handler()
-        mBluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        mBluetoothAdapter = mBluetoothManager.adapter
-
-        if(packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
-            if (!mBluetoothAdapter.isEnabled){
-                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                startActivityForResult(enableBtIntent, 1)
-            }
-            Dexter.withActivity(this)
-                    .withPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
-                    .withListener(object : PermissionListener {
-                        override fun onPermissionGranted(response: PermissionGrantedResponse?) {
-                            mScanner = mBluetoothAdapter.bluetoothLeScanner
-                            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
-                            startScanner()
-                        }
-                        override fun onPermissionDenied(response: PermissionDeniedResponse?) {
-                            toast("Navigator system need location permission")
-                        }
-                        override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest, token: PermissionToken) {
-                            token.continuePermissionRequest()
-                        }
-                    }).check()
-        }else{
-            toast("This Device can't use navigator")
-        }
         mapFragment.getMapAsync(this)
+
         val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, placeName)
         mListPlaceName.setAdapter(adapter)
         button_map_start_search.setOnClickListener {
@@ -135,7 +108,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             }
         })
         mListPlaceName.setOnItemClickListener { parent, view, position, id ->
-            editText_search_place.setText(placeName[position])
+            editText_search_place.setText(adapter.getItem(position))
         }
         /*searchBackground.setOnClickListener {
             if (focusMap){
@@ -162,7 +135,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                 LatLng(15.0,11.0))
         val mapGroundOverLay = GroundOverlayOptions()
                 .image(BitmapDescriptorFactory.fromResource(R.drawable.seniortesting))
-                .positionFromBounds(testingRoom).zIndex(1f)
+                .positionFromBounds(testingRoom).zIndex(0f)
         val locationZoom = LatLng(7.5,5.5)
         val cameraTraget = LatLngBounds(
                 LatLng(-0.01,-0.01), LatLng(16.0, 12.0))
@@ -172,7 +145,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         mMap.addGroundOverlay(mapGroundOverLay)
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationZoom,5f))
         mMap.setLatLngBoundsForCameraTarget(cameraTraget)
-        isMyLocation = mMap.addMarker(MarkerOptions().position(LatLng(-1000.0,-1000.0)).title("Mark"))
         mMap.uiSettings.isRotateGesturesEnabled = false
         mMap.uiSettings.isMapToolbarEnabled = false
         mMap.setOnCameraChangeListener {
@@ -183,6 +155,38 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             }else if(mMap.cameraPosition.zoom < minZoom){
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(minZoom))
             }
+        }
+        settingAndCheckPermission()
+        //Testing
+        myLocation = LatLng(7.5,5.5)
+        isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation!!).title("MyPosition"))
+    }
+    private fun settingAndCheckPermission(){
+        mHandler = Handler()
+        mBluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        mBluetoothAdapter = mBluetoothManager.adapter
+        if(packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
+            if (!mBluetoothAdapter.isEnabled){
+                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                startActivityForResult(enableBtIntent, 1)
+            }
+            Dexter.withActivity(this)
+                    .withPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+                    .withListener(object : PermissionListener {
+                        override fun onPermissionGranted(response: PermissionGrantedResponse?) {
+                            /*mScanner = mBluetoothAdapter.bluetoothLeScanner
+                            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
+                            startScanner()*/
+                        }
+                        override fun onPermissionDenied(response: PermissionDeniedResponse?) {
+                            toast("Navigator system need location permission")
+                        }
+                        override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest, token: PermissionToken) {
+                            token.continuePermissionRequest()
+                        }
+                    }).check()
+        }else{
+            toast("This Device can't use navigator")
         }
     }
     private var leScanCallBack = object : ScanCallback(){
@@ -222,10 +226,13 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val valueF = (distance2*distance2) - (distance3*distance3) - (x2*x2) + (x3*x3) - (y2*y2) + (y3*y3)
         val finalX = (((valueC*valueE) - (valueF*valueB))/((valueE*valueA)-(valueB*valueD)))
         val finalY = (((valueC*valueD)-(valueA*valueF))/((valueB*valueD)-(valueA*valueE)))
-        val myLocation : LatLng = LatLng(finalX,finalY)
+        myLocation = LatLng(finalX,finalY)
+//        val myLocation : LatLng = LatLng(finalX,finalY)
 
-        isMyLocation.remove()
-        isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation).title(count.toString()))
+        if (isMyLocation != null){
+            isMyLocation?.remove()
+        }
+        isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation!!).title(count.toString()))
         count += 1
         setStartData()
     }
@@ -307,7 +314,27 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             searchMarker?.remove()
             searchMarker = mMap.addMarker(MarkerOptions().position(roomPosition).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title(roomName))
         }
+        if (myLocation != null){
+            createLine(roomPosition,roomName)
+        }
     }
+    fun createLine(target : LatLng,name : String){
+        val lineOption = PolylineOptions().color(Color.RED)
+        lineOption.add(myLocation)
+        when(name){
+            "ZoneA" -> lineOption.add(LatLng(5.5,3.75))
+            "ZoneB" -> lineOption.add(LatLng(7.5,8.0))
+        }
+        lineOption.add(target)
+        if (polyLine == null){
+            polyLine = mMap.addPolyline(lineOption)
+        }else{
+            polyLine?.remove()
+            polyLine =  mMap.addPolyline(lineOption)
+        }
+//        mMap.addPolyline(PolylineOptions().geodesic(true).add(myLocation).add(target))
+    }
+
     fun toast(text : String){
         Toast.makeText(this,text, Toast.LENGTH_SHORT).show()
     }

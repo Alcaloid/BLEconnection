@@ -15,8 +15,8 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         var intent : Intent
-        val fragment = MapFragment()
-        val fragmentTan = supportFragmentManager.beginTransaction()
+//        val fragment = MapFragment()
+//        val fragmentTan = supportFragmentManager.beginTransaction()
         //button_main.text = "Testing"
         button_main.setOnClickListener {
             intent = Intent(this, TestPermission::class.java)
@@ -39,9 +39,9 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         fragment_button.setOnClickListener {
-            button_list.visibility = View.GONE
+            /*button_list.visibility = View.GONE
             fragmentTan.add(R.id.contaner,fragment)
-            fragmentTan.commit()
+            fragmentTan.commit()*/
         }
     }
 }
