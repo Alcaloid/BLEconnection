@@ -62,6 +62,19 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             arrayListOf(),
             arrayListOf()
     )
+    private var pointOfLine : Array<DoubleArray> = arrayOf(
+            // 0,1 are LatLng , 2+ are point can pass
+            doubleArrayOf(3.75,2.75,2.0,4.0),
+            doubleArrayOf(7.5,2.75,1.0,3.0),
+            doubleArrayOf(11.25,2.75,2.0,5.0),
+            doubleArrayOf(3.75,5.5,1.0,7.0),
+            doubleArrayOf(7.5,5.5,3.0,6.0,8.0),
+
+            doubleArrayOf(11.25,5.5,5.0),
+            doubleArrayOf(3.75,8.25,4.0,8.0),
+            doubleArrayOf(7.5,8.25,5.0,7.0,9.0),
+            doubleArrayOf(11.25,8.25,8.0)
+    )
     private var placeName : ArrayList<String> = arrayListOf(
             "ZoneA","ZoneB","ZoneC","ZoneD"
     )
@@ -82,6 +95,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         var buff : String = ""
         mapFragment.getMapAsync(this)
 
+        //Search system
         val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, placeName)
         mListPlaceName.setAdapter(adapter)
         button_map_start_search.setOnClickListener {
@@ -158,7 +172,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         }
         settingAndCheckPermission()
         //Testing
-        myLocation = LatLng(7.5,5.5)
+        myLocation = LatLng(3.75,2.75)
         isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation!!).title("MyPosition"))
     }
     private fun settingAndCheckPermission(){
@@ -203,38 +217,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                 beaconSignal[3].add(result.rssi)
             }
         }
-    }
-    private fun getDistance(rssi: Int,txPower:Int):Double{
-        //d = 10 ^ ((TxPower - RSSI) / (10 * n))
-        val n: Int = 2
-        val distance : Double = Math.pow(10.0,((txPower-rssi)/(10.0*n)))
-//        println("Distance:"+distance)
-        return distance
-    }
-    private fun markLocation(beacon1:Int, beacon2:Int, beacon3:Int,distance1:Double,distance2:Double,distance3:Double){
-        val x1 = beaconInformation[beacon1][0]
-        val x2 = beaconInformation[beacon2][0]
-        val x3 = beaconInformation[beacon3][0]
-        val y1 = beaconInformation[beacon1][1]
-        val y2 = beaconInformation[beacon2][1]
-        val y3 = beaconInformation[beacon3][1]
-        val valueA = (-2*x1) + (2*x2)
-        val valueB = (-2*y1) + (2*y2)
-        val valueC = (distance1*distance1) - (distance2*distance2) - (x1*x1) + (x2*x2) - (y1*y1) + (y2*y2)
-        val valueD = (-2*x2) + (2*x3)
-        val valueE = (-2*y2) + (2*y3)
-        val valueF = (distance2*distance2) - (distance3*distance3) - (x2*x2) + (x3*x3) - (y2*y2) + (y3*y3)
-        val finalX = (((valueC*valueE) - (valueF*valueB))/((valueE*valueA)-(valueB*valueD)))
-        val finalY = (((valueC*valueD)-(valueA*valueF))/((valueB*valueD)-(valueA*valueE)))
-        myLocation = LatLng(finalX,finalY)
-//        val myLocation : LatLng = LatLng(finalX,finalY)
-
-        if (isMyLocation != null){
-            isMyLocation?.remove()
-        }
-        isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation!!).title(count.toString()))
-        count += 1
-        setStartData()
     }
     fun setStartData(){
         for (i in 0..beaconSignal.size-1){
@@ -284,15 +266,37 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
-    fun startScanner(){
-        mHandler.postDelayed({
-            stopScanner()
-            findMyLocation()
-        },5000)
-        mScanner.startScan(null,scanSetting,leScanCallBack)
+    fun getDistance(rssi: Int,txPower:Int):Double{
+        //d = 10 ^ ((TxPower - RSSI) / (10 * n))
+        val n: Int = 2
+        val distance : Double = Math.pow(10.0,((txPower-rssi)/(10.0*n)))
+//        println("Distance:"+distance)
+        return distance
     }
-    fun stopScanner(){
-        mScanner.stopScan(leScanCallBack)
+    fun markLocation(beacon1:Int, beacon2:Int, beacon3:Int,distance1:Double,distance2:Double,distance3:Double){
+        val x1 = beaconInformation[beacon1][0]
+        val x2 = beaconInformation[beacon2][0]
+        val x3 = beaconInformation[beacon3][0]
+        val y1 = beaconInformation[beacon1][1]
+        val y2 = beaconInformation[beacon2][1]
+        val y3 = beaconInformation[beacon3][1]
+        val valueA = (-2*x1) + (2*x2)
+        val valueB = (-2*y1) + (2*y2)
+        val valueC = (distance1*distance1) - (distance2*distance2) - (x1*x1) + (x2*x2) - (y1*y1) + (y2*y2)
+        val valueD = (-2*x2) + (2*x3)
+        val valueE = (-2*y2) + (2*y3)
+        val valueF = (distance2*distance2) - (distance3*distance3) - (x2*x2) + (x3*x3) - (y2*y2) + (y3*y3)
+        val finalX = (((valueC*valueE) - (valueF*valueB))/((valueE*valueA)-(valueB*valueD)))
+        val finalY = (((valueC*valueD)-(valueA*valueF))/((valueB*valueD)-(valueA*valueE)))
+        myLocation = LatLng(finalX,finalY)
+//        val myLocation : LatLng = LatLng(finalX,finalY)
+
+        if (isMyLocation != null){
+            isMyLocation?.remove()
+        }
+        isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation!!).title(count.toString()))
+        count += 1
+        setStartData()
     }
     fun checkSearch(string: String){
         val buff = string.toLowerCase()
@@ -320,11 +324,15 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     }
     fun createLine(target : LatLng,name : String){
         val lineOption = PolylineOptions().color(Color.RED)
+        var positionLine : LatLng? = myLocation
         lineOption.add(myLocation)
-        when(name){
+        while (positionLine != target){
+            
+        }
+        /*when(name){
             "ZoneA" -> lineOption.add(LatLng(5.5,3.75))
             "ZoneB" -> lineOption.add(LatLng(7.5,8.0))
-        }
+        }*/
         lineOption.add(target)
         if (polyLine == null){
             polyLine = mMap.addPolyline(lineOption)
@@ -334,7 +342,16 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         }
 //        mMap.addPolyline(PolylineOptions().geodesic(true).add(myLocation).add(target))
     }
-
+    fun startScanner(){
+        mHandler.postDelayed({
+            stopScanner()
+            findMyLocation()
+        },5000)
+        mScanner.startScan(null,scanSetting,leScanCallBack)
+    }
+    fun stopScanner(){
+        mScanner.stopScan(leScanCallBack)
+    }
     fun toast(text : String){
         Toast.makeText(this,text, Toast.LENGTH_SHORT).show()
     }
