@@ -26,6 +26,7 @@
             android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -57,11 +58,11 @@
         <activity
             android:name=".Map.Maps2Activity"
             android:label="@string/title_activity_maps2"
-            android:screenOrientation="portrait"
-            />
+            android:screenOrientation="portrait" />
         <activity android:name=".BLEScanner.BLEscannerNewVersionActivity" />
-        <activity android:name=".SearchSystemActivity"/>
-        <activity android:name=".TestPermission"/>
+        <activity android:name=".SearchSystemActivity" />
+        <activity android:name=".TestPermission" />
+        <activity android:name=".TesterFragment"></activity>
     </application>
 
 </manifest>

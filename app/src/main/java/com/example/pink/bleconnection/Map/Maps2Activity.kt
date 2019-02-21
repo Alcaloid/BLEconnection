@@ -278,23 +278,17 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             searchMarker?.remove()
             searchMarker = mMap.addMarker(MarkerOptions().position(roomPosition).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title(roomName))
         }
-        if (myLocation != null && myLocation != roomPosition){
+        /*if (myLocation != null){
             createLine(roomPosition,roomName)
-        }else if (myLocation == roomPosition){
-            calFunction.toast("You are on this location",this@Maps2Activity)
-        }
+        }*/
     }
     fun createLine(target : LatLng,name : String){
         val lineOption = PolylineOptions().color(Color.RED)
-        var positionLine : LatLng? = myLocation
         lineOption.add(myLocation)
-        while (positionLine != target){
-            
-        }
-        /*when(name){
+        when(name){
             "ZoneA" -> lineOption.add(LatLng(5.5,3.75))
             "ZoneB" -> lineOption.add(LatLng(7.5,8.0))
-        }*/
+        }
         lineOption.add(target)
         if (polyLine == null){
             polyLine = mMap.addPolyline(lineOption)
