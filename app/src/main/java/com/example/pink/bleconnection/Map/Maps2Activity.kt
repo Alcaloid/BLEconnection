@@ -11,8 +11,6 @@ import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
-import android.support.v4.content.ContextCompat
-import android.widget.Toast
 import com.example.pink.bleconnection.R
 
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -20,12 +18,13 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
-import android.support.v4.app.ActivityCompat
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
+import com.example.pink.bleconnection.Model.CalculatorFunction
+import com.example.pink.bleconnection.Model.PointOfLine
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -62,25 +61,14 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             arrayListOf(),
             arrayListOf()
     )
-    private var pointOfLine : Array<DoubleArray> = arrayOf(
-            // 0,1 are LatLng , 2+ are point can pass
-            doubleArrayOf(3.75,2.75,2.0,4.0),
-            doubleArrayOf(7.5,2.75,1.0,3.0),
-            doubleArrayOf(11.25,2.75,2.0,5.0),
-            doubleArrayOf(3.75,5.5,1.0,7.0),
-            doubleArrayOf(7.5,5.5,3.0,6.0,8.0),
-
-            doubleArrayOf(11.25,5.5,5.0),
-            doubleArrayOf(3.75,8.25,4.0,8.0),
-            doubleArrayOf(7.5,8.25,5.0,7.0,9.0),
-            doubleArrayOf(11.25,8.25,8.0)
-    )
+    private var pointOfLine : ArrayList<PointOfLine> = arrayListOf()
     private var placeName : ArrayList<String> = arrayListOf(
             "ZoneA","ZoneB","ZoneC","ZoneD"
     )
     private var isMyLocation : Marker? = null
     private var myLocation : LatLng? = null
     private var polyLine : Polyline? = null
+    private var calFunction : CalculatorFunction = CalculatorFunction()
     var searchMarker : Marker? = null
     var tmp : DoubleArray = doubleArrayOf()
     var count : Int = 0
@@ -193,14 +181,15 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                             startScanner()*/
                         }
                         override fun onPermissionDenied(response: PermissionDeniedResponse?) {
-                            toast("Navigator system need location permission")
+                            calFunction.toast("Navigator system need location permission",this@Maps2Activity)
                         }
                         override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest, token: PermissionToken) {
                             token.continuePermissionRequest()
                         }
                     }).check()
+            setPoint()
         }else{
-            toast("This Device can't use navigator")
+            calFunction.toast("This Device can't use navigator",this@Maps2Activity)
         }
     }
     private var leScanCallBack = object : ScanCallback(){
@@ -228,10 +217,9 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     fun findMyLocation(){
         val averageSignal : Array<Int> = arrayOf(0,0,0,0)
         for (i in 0..beaconSignal.size-1){
-            averageSignal[i] = findAverage(beaconSignal[i])
+            averageSignal[i] = calFunction.calAverage(beaconSignal[i])
             if (averageSignal[i]!= -100000) {
-//                println("Beacon is "+dataDistance[i][0])
-                dataDistance[i][1] = getDistance(averageSignal[i],beaconInformation[i][2])
+                dataDistance[i][1] = calFunction.calDistanceFromRSSI(averageSignal[i],beaconInformation[i][2])
             }
         }
         distanceMinToMax()
@@ -241,17 +229,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         }else{
             startScanner() //get more signal
         }
-    }
-    fun findAverage(dataArray: ArrayList<Int>):Int{
-        var averageNumber : Int = -100000
-        if (!dataArray.isEmpty()){
-            averageNumber = 0
-            for (i in 0..dataArray.size-1){
-                averageNumber = averageNumber + dataArray[i]
-            }
-            averageNumber = averageNumber/dataArray.size
-        }
-        return averageNumber
     }
     fun distanceMinToMax(){
         for (i in 0..dataDistance.size-1){
@@ -266,13 +243,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
     }
-    fun getDistance(rssi: Int,txPower:Int):Double{
-        //d = 10 ^ ((TxPower - RSSI) / (10 * n))
-        val n: Int = 2
-        val distance : Double = Math.pow(10.0,((txPower-rssi)/(10.0*n)))
-//        println("Distance:"+distance)
-        return distance
-    }
     fun markLocation(beacon1:Int, beacon2:Int, beacon3:Int,distance1:Double,distance2:Double,distance3:Double){
         val x1 = beaconInformation[beacon1][0]
         val x2 = beaconInformation[beacon2][0]
@@ -280,17 +250,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val y1 = beaconInformation[beacon1][1]
         val y2 = beaconInformation[beacon2][1]
         val y3 = beaconInformation[beacon3][1]
-        val valueA = (-2*x1) + (2*x2)
-        val valueB = (-2*y1) + (2*y2)
-        val valueC = (distance1*distance1) - (distance2*distance2) - (x1*x1) + (x2*x2) - (y1*y1) + (y2*y2)
-        val valueD = (-2*x2) + (2*x3)
-        val valueE = (-2*y2) + (2*y3)
-        val valueF = (distance2*distance2) - (distance3*distance3) - (x2*x2) + (x3*x3) - (y2*y2) + (y3*y3)
-        val finalX = (((valueC*valueE) - (valueF*valueB))/((valueE*valueA)-(valueB*valueD)))
-        val finalY = (((valueC*valueD)-(valueA*valueF))/((valueB*valueD)-(valueA*valueE)))
-        myLocation = LatLng(finalX,finalY)
-//        val myLocation : LatLng = LatLng(finalX,finalY)
-
+        myLocation = calFunction.calLocation(x1,x2,x3,y1,y2,y3,distance1,distance2,distance3)
         if (isMyLocation != null){
             isMyLocation?.remove()
         }
@@ -307,7 +267,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             "zoned" -> markSearchRoom(LatLng(11.25,8.25),"ZoneD")
             else -> {
                 if (searchMarker != null) searchMarker?.remove()
-                toast("Doesn't found room")
+                calFunction.toast("Doesn't found room",this@Maps2Activity)
             }
         }
     }
@@ -318,8 +278,10 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             searchMarker?.remove()
             searchMarker = mMap.addMarker(MarkerOptions().position(roomPosition).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title(roomName))
         }
-        if (myLocation != null){
+        if (myLocation != null && myLocation != roomPosition){
             createLine(roomPosition,roomName)
+        }else if (myLocation == roomPosition){
+            calFunction.toast("You are on this location",this@Maps2Activity)
         }
     }
     fun createLine(target : LatLng,name : String){
@@ -342,6 +304,23 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         }
 //        mMap.addPolyline(PolylineOptions().geodesic(true).add(myLocation).add(target))
     }
+    fun setPoint(){
+        addPoint(LatLng(3.75,2.75)  , arrayOf(1,3))
+        addPoint(LatLng(7.5,2.75)   , arrayOf(0,2))
+        addPoint(LatLng(11.25,2.75) , arrayOf(1,4))
+        addPoint(LatLng(3.75,5.5)   , arrayOf(0,6))
+        addPoint(LatLng(7.5,5.5)    , arrayOf(2,5,7))
+
+        addPoint(LatLng(11.25,5.5)  , arrayOf(4))
+        addPoint(LatLng(3.75,8.25)  , arrayOf(3,7))
+        addPoint(LatLng(7.5,8.25)   , arrayOf(4,6,8))
+        addPoint(LatLng(11.25,8.25) , arrayOf(7))
+    }
+    fun addPoint(latLng: LatLng,path: Array<Int>){
+        val point : PointOfLine = PointOfLine()
+        point.PointOfLine(latLng,path)
+        pointOfLine.add(point)
+    }
     fun startScanner(){
         mHandler.postDelayed({
             stopScanner()
@@ -351,9 +330,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     }
     fun stopScanner(){
         mScanner.stopScan(leScanCallBack)
-    }
-    fun toast(text : String){
-        Toast.makeText(this,text, Toast.LENGTH_SHORT).show()
     }
     fun colseSoftKeyboard(){
         val inputManager: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
