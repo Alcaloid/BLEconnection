@@ -56,7 +56,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
                 LatLng(0.0, 0.0),
                 LatLng(45.0,90.0))
         val mapGroundOverLay = GroundOverlayOptions()
-                .image(BitmapDescriptorFactory.fromResource(R.drawable.floor11))
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.seniortesting))
                 .positionFromBounds(testingRoom).zIndex(1f)
         val locationZoom = LatLng(7.5,5.5)
         val cameraTraget = LatLngBounds(

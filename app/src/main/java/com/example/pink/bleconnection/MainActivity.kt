@@ -39,7 +39,8 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         fragment_button.setOnClickListener {
-
+            intent = Intent(this, PlateActivity::class.java)
+            startActivity(intent)
             /*button_list.visibility = View.GONE
             fragmentTan.add(R.id.contaner,fragment)
             fragmentTan.commit()*/
