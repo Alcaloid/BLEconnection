@@ -26,10 +26,6 @@ class MainActivity : AppCompatActivity() {
             intent = Intent(this, BluetoothReciveRSSIActivity::class.java)
             startActivity(intent)
         }
-        notiButton.setOnClickListener {
-            intent = Intent(this, NotificationActivity::class.java)
-            startActivity(intent)
-        }
         mapbutton.setOnClickListener {
             intent = Intent(this, SearchSystemActivity::class.java)
             startActivity(intent)

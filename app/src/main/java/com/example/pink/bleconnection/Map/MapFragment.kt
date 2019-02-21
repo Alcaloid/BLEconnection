@@ -54,13 +54,13 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         val testingRoom = LatLngBounds(
                 LatLng(0.0, 0.0),
-                LatLng(45.0,90.0))
+                LatLng(60.0,35.0))
         val mapGroundOverLay = GroundOverlayOptions()
-                .image(BitmapDescriptorFactory.fromResource(R.drawable.seniortesting))
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.floor11))
                 .positionFromBounds(testingRoom).zIndex(1f)
         val locationZoom = LatLng(7.5,5.5)
         val cameraTraget = LatLngBounds(
-                LatLng(-0.01,-0.01), LatLng(45.001, 90.001))
+                LatLng(-0.01,-0.01), LatLng(90.001, 90.001))
         mMap = googleMap
         mMap.mapType = GoogleMap.MAP_TYPE_NONE
         mMap.addGroundOverlay(mapGroundOverLay)
@@ -69,7 +69,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
         mMap.uiSettings.isRotateGesturesEnabled = false
         mMap.uiSettings.isMapToolbarEnabled = false
         mMap.setOnCameraChangeListener {
-            val maxZoom = 8.0f;
+            val maxZoom = 10.0f;
             val minZoom = 5.0f
             if (mMap.cameraPosition.zoom > maxZoom){
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(maxZoom))
