@@ -2,6 +2,7 @@ package com.example.pink.bleconnection
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.v4.app.Fragment
 import com.example.pink.bleconnection.Map.MapFragment
 import kotlinx.android.synthetic.main.activity_plate.*
 
@@ -11,23 +12,25 @@ class PlateActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_plate)
         var onMap : Boolean = false
-        val fragmentTan = supportFragmentManager.beginTransaction()
-        fragmentTan.add(R.id.contraner,QueFragment())
-        fragmentTan.commit()
+        changeFragment(QueFragment())
 
         button_plate_to_que.setOnClickListener {
             if (onMap){
                 onMap = !onMap
-                fragmentTan.add(R.id.contraner,QueFragment())
-                fragmentTan.commit()
+                changeFragment(QueFragment())
             }
         }
         button_plate_to_map.setOnClickListener {
             if (!onMap){
                 onMap = !onMap
-                fragmentTan.add(R.id.contraner,MapFragment())
-                fragmentTan.commit()
+                changeFragment(MapFragment())
             }
         }
+    }
+    fun changeFragment(fragment : Fragment){
+        val fragmentTan = supportFragmentManager.beginTransaction()
+        fragmentTan.replace(R.id.contraner, fragment)
+                .addToBackStack(null)
+                .commit()
     }
 }
