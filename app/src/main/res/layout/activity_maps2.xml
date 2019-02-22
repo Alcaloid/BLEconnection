@@ -40,15 +40,12 @@
                 android:orientation="horizontal"
                 android:visibility="visible">
 
-                <Button
-                    android:id="@+id/button_map_cloesr"
+                <ImageButton
+                    android:id="@+id/button_map_menu_bar"
                     android:layout_width="50dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0"
+                    android:layout_height="match_parent"
                     android:background="@android:color/transparent"
-                    android:text="@string/button_back"
-                    android:textColor="@android:color/holo_blue_dark"
-                    android:textAllCaps="false"/>
+                    app:srcCompat="@drawable/ic_dehaze_black_24dp" />
 
                 <TextView
                     android:id="@+id/text_map_floor"
