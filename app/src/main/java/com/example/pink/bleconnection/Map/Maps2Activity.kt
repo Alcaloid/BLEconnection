@@ -172,9 +172,24 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                 settingAndCheckPermission()
             }
         }
+        button_navigation.setOnClickListener {
+            if (showNavigation){
+                showNavigation = false
+                button_navigation.text = getString(R.string.text_off)
+                if (polyLine != null){
+                    polyLine?.remove()
+                }
+            }else{
+                showNavigation = true
+                button_navigation.text = getString(R.string.text_on)
+                if (showMyLocation && searchMarker!=null){
+                    createLine(LatLng(searchMarker!!.position.latitude,searchMarker!!.position.longitude),searchMarker!!.title)
+                }
+            }
+        }
         //Testing
-        myLocation = LatLng(3.75,2.75)
-        isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation!!).title("MyPosition"))
+//        myLocation = LatLng(3.75,2.75)
+//        isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation!!).title("MyPosition"))
     }
     private fun settingAndCheckPermission(){
         if(packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
@@ -293,9 +308,9 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             searchMarker?.remove()
             searchMarker = mMap.addMarker(MarkerOptions().position(roomPosition).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title(roomName))
         }
-        /*if (myLocation != null){
+        if (myLocation != null){
             createLine(roomPosition,roomName)
-        }*/
+        }
     }
     fun createLine(target : LatLng,name : String){
         val lineOption = PolylineOptions().color(Color.RED)
@@ -310,6 +325,14 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         }else{
             polyLine?.remove()
             polyLine =  mMap.addPolyline(lineOption)
+        }
+        if (myLocation!=target){
+            //update Location
+            mHandler.postDelayed({
+                createLine(target,name)
+            },5000)
+        }else{
+            calFunction.toast("XXXXX",this@Maps2Activity)
         }
 //        mMap.addPolyline(PolylineOptions().geodesic(true).add(myLocation).add(target))
     }

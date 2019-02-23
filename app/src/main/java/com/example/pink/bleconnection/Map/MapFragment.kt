@@ -144,14 +144,14 @@ class MapFragment : Fragment(), OnMapReadyCallback {
             }
         }
     }
-    fun startScanner(){
+    private fun startScanner(){
         mHandler.postDelayed({
             stopScanner()
             //findMyLocation()
         },5000)
         mScanner.startScan(null,scanSetting,leScanCallBack)
     }
-    fun stopScanner(){
+    private fun stopScanner(){
         mScanner.stopScan(leScanCallBack)
     }
 
