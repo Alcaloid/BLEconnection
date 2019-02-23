@@ -69,6 +69,8 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     private var myLocation : LatLng? = null
     private var polyLine : Polyline? = null
     private var calFunction : CalculatorFunction = CalculatorFunction()
+    private var showMyLocation : Boolean = false
+    private var showNavigation : Boolean = false
     var searchMarker : Marker? = null
     var tmp : DoubleArray = doubleArrayOf()
     var count : Int = 0
@@ -80,6 +82,9 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
                 .findFragmentById(R.id.map) as SupportMapFragment
+        mHandler = Handler()
+        mBluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        mBluetoothAdapter = mBluetoothManager.adapter
         var buff : String = ""
         mapFragment.getMapAsync(this)
 
@@ -158,15 +163,20 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(minZoom))
             }
         }
-        settingAndCheckPermission()
+        button_mylocal.setOnClickListener {
+            if (showMyLocation){
+                showMyLocation = false
+                button_mylocal.text = getString(R.string.text_off)
+                stopScanner()
+            }else{
+                settingAndCheckPermission()
+            }
+        }
         //Testing
         myLocation = LatLng(3.75,2.75)
         isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation!!).title("MyPosition"))
     }
     private fun settingAndCheckPermission(){
-        mHandler = Handler()
-        mBluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        mBluetoothAdapter = mBluetoothManager.adapter
         if(packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
             if (!mBluetoothAdapter.isEnabled){
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
@@ -176,9 +186,14 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                     .withPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
                     .withListener(object : PermissionListener {
                         override fun onPermissionGranted(response: PermissionGrantedResponse?) {
-                            /*mScanner = mBluetoothAdapter.bluetoothLeScanner
+                            showMyLocation = true
+                            button_mylocal.text = getString(R.string.text_on)
+                            if (myLocation != null){
+                                isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation!!).title("MyLocation"))
+                            }
+                            mScanner = mBluetoothAdapter.bluetoothLeScanner
                             scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
-                            startScanner()*/
+                            startScanner()
                         }
                         override fun onPermissionDenied(response: PermissionDeniedResponse?) {
                             calFunction.toast("Navigator system need location permission",this@Maps2Activity)
@@ -187,7 +202,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                             token.continuePermissionRequest()
                         }
                     }).check()
-            setPoint()
+//            setPoint()
         }else{
             calFunction.toast("This Device can't use navigator",this@Maps2Activity)
         }
@@ -324,6 +339,9 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     }
     fun stopScanner(){
         mScanner.stopScan(leScanCallBack)
+        if (isMyLocation != null){
+            isMyLocation?.remove()
+        }
     }
     fun colseSoftKeyboard(){
         val inputManager: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
@@ -331,6 +349,8 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     }
     override fun onDestroy() {
         super.onDestroy()
-        mScanner.stopScan(leScanCallBack)
+        if (showMyLocation){
+            mScanner.stopScan(leScanCallBack)
+        }
     }
 }
