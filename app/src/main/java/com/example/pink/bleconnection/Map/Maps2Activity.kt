@@ -21,7 +21,6 @@ import com.google.android.gms.maps.model.*
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
-import android.view.inputmethod.InputMethodManager
 import android.widget.ArrayAdapter
 import com.example.pink.bleconnection.Model.CalculatorFunction
 import com.example.pink.bleconnection.Model.PointOfLine
@@ -36,10 +35,10 @@ import kotlinx.android.synthetic.main.activity_maps2.*
 class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
-    lateinit var mBluetoothManager : BluetoothManager
-    lateinit var mBluetoothAdapter : BluetoothAdapter
-    lateinit var mScanner : BluetoothLeScanner
-    lateinit var mHandler: Handler
+    private var mBluetoothManager : BluetoothManager? = null
+    private var mBluetoothAdapter : BluetoothAdapter? = null
+    private var mScanner : BluetoothLeScanner? = null
+    private var mHandler: Handler? = null
     lateinit var scanSetting : ScanSettings
     private var beaconInformation : Array<IntArray> = arrayOf(
             //0,1 is x,y and 2 is txpower
@@ -69,8 +68,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     private var myLocation : LatLng? = null
     private var polyLine : Polyline? = null
     private var calFunction : CalculatorFunction = CalculatorFunction()
-    private var showMyLocation : Boolean = false
-    private var showNavigation : Boolean = false
+    private var showMyLocation = false
     var searchMarker : Marker? = null
     var tmp : DoubleArray = doubleArrayOf()
     var count : Int = 0
@@ -84,47 +82,14 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                 .findFragmentById(R.id.map) as SupportMapFragment
         mHandler = Handler()
         mBluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        mBluetoothAdapter = mBluetoothManager.adapter
-        var buff : String = ""
+        mBluetoothAdapter = mBluetoothManager?.adapter
         mapFragment.getMapAsync(this)
 
-        //Search system
-        val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, placeName)
-        mListPlaceName.setAdapter(adapter)
-        button_map_start_search.setOnClickListener {
-            searchBackground.setBackgroundColor(resources.getColor(R.color.angel_white))
-            search_font.visibility = View.GONE
-            search_backend.visibility = View.VISIBLE
-            mListPlaceName.visibility = View.VISIBLE
+        button_background.setOnClickListener {
+            calFunction.toast("Coming Soon",this@Maps2Activity)
         }
-        button_search_closer.setOnClickListener {
-            searchBackground.setBackgroundColor(Color.TRANSPARENT)
-            buff = editText_search_place.text.toString()
-            if (!buff.equals("")){
-                checkSearch(buff)
-            }
-            mListPlaceName.visibility = View.GONE
-            search_backend.visibility = View.GONE
-            search_font.visibility = View.VISIBLE
-        }
-        editText_search_place.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {}
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int){}
-            override fun onTextChanged(str: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                adapter.filter.filter(str)
-            }
-        })
-        mListPlaceName.setOnItemClickListener { parent, view, position, id ->
-            editText_search_place.setText(adapter.getItem(position))
-        }
-        /*searchBackground.setOnClickListener {
-            if (focusMap){
-                search_background.visibility = View.VISIBLE
-            }else{
-                search_background.visibility = View.GONE
-            }
-            focusMap = !focusMap
-        }*/
+        searchOperation()
+        navigationOperation()
     }
 
     /**
@@ -163,37 +128,14 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(minZoom))
             }
         }
-        button_mylocal.setOnClickListener {
-            if (showMyLocation){
-                showMyLocation = false
-                button_mylocal.text = getString(R.string.text_off)
-                stopScanner()
-            }else{
-                settingAndCheckPermission()
-            }
-        }
-        button_navigation.setOnClickListener {
-            if (showNavigation){
-                showNavigation = false
-                button_navigation.text = getString(R.string.text_off)
-                if (polyLine != null){
-                    polyLine?.remove()
-                }
-            }else{
-                showNavigation = true
-                button_navigation.text = getString(R.string.text_on)
-                if (showMyLocation && searchMarker!=null){
-                    createLine(LatLng(searchMarker!!.position.latitude,searchMarker!!.position.longitude),searchMarker!!.title)
-                }
-            }
-        }
+        settingAndCheckPermission()
         //Testing
 //        myLocation = LatLng(3.75,2.75)
 //        isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation!!).title("MyPosition"))
     }
     private fun settingAndCheckPermission(){
         if(packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
-            if (!mBluetoothAdapter.isEnabled){
+            mBluetoothAdapter?.takeIf { !it.isEnabled }?.apply {
                 val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
                 startActivityForResult(enableBtIntent, 1)
             }
@@ -202,11 +144,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                     .withListener(object : PermissionListener {
                         override fun onPermissionGranted(response: PermissionGrantedResponse?) {
                             showMyLocation = true
-                            button_mylocal.text = getString(R.string.text_on)
-                            if (myLocation != null){
-                                isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation!!).title("MyLocation"))
-                            }
-                            mScanner = mBluetoothAdapter.bluetoothLeScanner
+                            mScanner = mBluetoothAdapter?.bluetoothLeScanner
                             scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
                             startScanner()
                         }
@@ -217,7 +155,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                             token.continuePermissionRequest()
                         }
                     }).check()
-//            setPoint()
         }else{
             calFunction.toast("This Device can't use navigator",this@Maps2Activity)
         }
@@ -288,6 +225,57 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         count += 1
         setStartData()
     }
+
+    fun searchOperation(){
+        var buff : String = ""
+        val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, placeName)
+        mListPlaceName.setAdapter(adapter)
+        text_show_search.setOnClickListener {
+            searchBackground.setBackgroundColor(resources.getColor(R.color.angel_white))
+            search_font_2.visibility = View.GONE
+            search_back_2.visibility = View.VISIBLE
+            mListPlaceName.visibility = View.VISIBLE
+        }
+        search_back_to_font.setOnClickListener {
+            searchBackground.setBackgroundColor(Color.TRANSPARENT)
+            mListPlaceName.visibility = View.GONE
+            search_back_2.visibility = View.GONE
+            search_font_2.visibility = View.VISIBLE
+            if (searchMarker != null){
+                searchMarker?.remove()
+            }
+        }
+        editText_search_place_2.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int){}
+            override fun onTextChanged(str: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                adapter.filter.filter(str)
+            }
+        })
+        button_search.setOnClickListener {
+            searchBackground.setBackgroundColor(Color.TRANSPARENT)
+            mListPlaceName.visibility = View.GONE
+            buff = editText_search_place_2.text.toString()
+            if (!buff.equals("")){
+                checkSearch(buff)
+            }
+            search_back_2.visibility = View.GONE
+            search_font_2.visibility = View.VISIBLE
+        }
+        button_search_delete_text.setOnClickListener {
+            button_search_delete_text.visibility = View.GONE
+            line_1.visibility = View.VISIBLE
+            button_navigation.visibility = View.VISIBLE
+            text_show_search.text = getString(R.string.searchtext)
+            text_show_search.setTextColor(Color.GRAY)
+            if (searchMarker != null){
+                searchMarker?.remove()
+            }
+        }
+        mListPlaceName.setOnItemClickListener { parent, view, position, id ->
+            editText_search_place_2.setText(adapter.getItem(position))
+        }
+    }
     fun checkSearch(string: String){
         val buff = string.toLowerCase()
         when(buff){
@@ -296,22 +284,40 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             "zonec" -> markSearchRoom(LatLng(3.75,8.25),"ZoneC")
             "zoned" -> markSearchRoom(LatLng(11.25,8.25),"ZoneD")
             else -> {
-                if (searchMarker != null) searchMarker?.remove()
+//                if (searchMarker != null) searchMarker?.remove()
                 calFunction.toast("Doesn't found room",this@Maps2Activity)
             }
         }
     }
     fun markSearchRoom(roomPosition : LatLng,roomName : String){
+        line_1.visibility = View.GONE
+        button_navigation.visibility = View.GONE
+        button_search_delete_text.visibility = View.VISIBLE
+        text_show_search.text = roomName
+        text_show_search.setTextColor(Color.BLACK)
         if (searchMarker == null){
             searchMarker = mMap.addMarker(MarkerOptions().position(roomPosition).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title(roomName))
         }else{
             searchMarker?.remove()
             searchMarker = mMap.addMarker(MarkerOptions().position(roomPosition).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title(roomName))
         }
-        if (myLocation != null){
-            createLine(roomPosition,roomName)
+    }
+
+    fun navigationOperation(){
+        val buff : String = editText_navigation.text.toString()
+        button_navigation.setOnClickListener {
+            search_font_2.visibility = View.GONE
+            navigation_background.visibility = View.VISIBLE
+        }
+        navigation_back_to_search.setOnClickListener {
+            navigation_background.visibility = View.GONE
+            search_font_2.visibility = View.VISIBLE
+        }
+        button_set_navigation.setOnClickListener {
+            calFunction.toast("Coming Soon",this@Maps2Activity)
         }
     }
+
     fun createLine(target : LatLng,name : String){
         val lineOption = PolylineOptions().color(Color.RED)
         lineOption.add(myLocation)
@@ -328,7 +334,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         }
         if (myLocation!=target){
             //update Location
-            mHandler.postDelayed({
+            mHandler?.postDelayed({
                 createLine(target,name)
             },5000)
         }else{
@@ -354,26 +360,22 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         pointOfLine.add(point)
     }
     fun startScanner(){
-        mHandler.postDelayed({
+        mHandler?.postDelayed({
             stopScanner()
             findMyLocation()
         },5000)
-        mScanner.startScan(null,scanSetting,leScanCallBack)
+        mScanner?.startScan(null,scanSetting,leScanCallBack)
     }
     fun stopScanner(){
-        mScanner.stopScan(leScanCallBack)
+        mScanner?.stopScan(leScanCallBack)
         if (isMyLocation != null){
             isMyLocation?.remove()
         }
     }
-    fun colseSoftKeyboard(){
-        val inputManager: InputMethodManager = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        inputManager.hideSoftInputFromWindow(currentFocus?.windowToken, InputMethodManager.SHOW_FORCED)
-    }
     override fun onDestroy() {
         super.onDestroy()
         if (showMyLocation){
-            mScanner.stopScan(leScanCallBack)
+            mScanner?.stopScan(leScanCallBack)
         }
     }
 }

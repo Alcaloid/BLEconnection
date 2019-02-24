@@ -2,7 +2,7 @@
     <string name="app_name">BLEconnection</string>
     <string name="title_activity_maps2">Map</string>
     <string name="edittext_hint_search">Search Room</string>
-    <string name="button_searchtext">Search here</string>
+    <string name="searchtext">Search here</string>
     <string name="button_back">back</string>
     <string name="text_showmylocation">My Location</string>
     <string name="text_shownavigation">Navigation</string>
@@ -10,4 +10,6 @@
     <string name="title_activity_indoor_plate">IndoorPlateActivity</string>
     <string name="text_on">ON</string>
     <string name="text_off">OFF</string>
+    <string name="guide_to">Guide to</string>
+    <string name="guide">Guide</string>
 </resources>
