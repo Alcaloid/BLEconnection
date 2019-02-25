@@ -44,5 +44,4 @@ class BeaconDetail{
     fun setPower(power: Int){
         this.txPower = power
     }
-
 }

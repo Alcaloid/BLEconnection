@@ -11,17 +11,6 @@ class CalculatorFunction(){
         val distance : Double = Math.pow(10.0,((txPower-rssi)/(10.0*n)))
         return distance
     }
-    public fun calAverage(dataArray: ArrayList<Int>):Int{
-        var averageNumber : Int = -100000
-        if (!dataArray.isEmpty()){
-            averageNumber = 0
-            for (i in 0..dataArray.size-1){
-                averageNumber = averageNumber + dataArray[i]
-            }
-            averageNumber = averageNumber/dataArray.size
-        }
-        return averageNumber
-    }
     public fun calLocation(x1:Double,x2:Double,x3:Double,
                            y1:Double,y2:Double,y3:Double,
                            distance1:Double,distance2:Double,distance3:Double) : LatLng{

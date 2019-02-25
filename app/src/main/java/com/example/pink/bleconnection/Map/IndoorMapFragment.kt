@@ -37,7 +37,7 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import kotlinx.android.synthetic.main.fragment_map.*
 
-class MapFragment : Fragment(), OnMapReadyCallback {
+class IndoorMapFragment : Fragment(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
     private lateinit var mBluetoothManager : BluetoothManager
@@ -56,7 +56,7 @@ class MapFragment : Fragment(), OnMapReadyCallback {
     )
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.fragment_map, container, false)
+        val view = inflater.inflate(R.layout.crazylayout, container, false)
         return view
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

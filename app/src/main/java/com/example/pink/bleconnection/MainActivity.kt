@@ -3,9 +3,7 @@ package com.example.pink.bleconnection
 import android.content.Intent
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.view.View
 import com.example.pink.bleconnection.BLEScanner.BluetoothReciveRSSIActivity
-import com.example.pink.bleconnection.Map.MapFragment
 import com.example.pink.bleconnection.Map.Maps2Activity
 import kotlinx.android.synthetic.main.activity_main.*
 
@@ -15,9 +13,6 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         var intent : Intent
-//        val fragment = MapFragment()
-//        val fragmentTan = supportFragmentManager.beginTransaction()
-        //button_main.text = "Testing"
         button_main.setOnClickListener {
             intent = Intent(this, TestPermission::class.java)
             startActivity(intent)
@@ -37,9 +32,6 @@ class MainActivity : AppCompatActivity() {
         fragment_button.setOnClickListener {
             intent = Intent(this, PlateActivity::class.java)
             startActivity(intent)
-            /*button_list.visibility = View.GONE
-            fragmentTan.add(R.id.contaner,fragment)
-            fragmentTan.commit()*/
         }
     }
 }

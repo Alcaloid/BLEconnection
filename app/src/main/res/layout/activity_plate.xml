@@ -6,16 +6,28 @@
     android:layout_height="match_parent"
     tools:context=".PlateActivity">
 
+    <android.support.v4.view.ViewPager
+        android:id="@+id/page_viewer"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" >
+
+    </android.support.v4.view.ViewPager>
+
+    <android.support.design.widget.TabLayout
+        android:id="@+id/tabs_plate"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentBottom="true"
+        android:background="@color/searchBarBackIconTintColorDark"
+        app:tabMode="fixed" />
+
     <FrameLayout
         android:id="@+id/contraner"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
-        <ToggleButton
-            android:id="@+id/toggleButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="ToggleButton" />
     </FrameLayout>
 
     <LinearLayout
@@ -25,7 +37,8 @@
         android:layout_alignParentStart="true"
         android:layout_alignParentBottom="true"
         android:background="@color/blue_sky"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:visibility="gone">
 
         <ImageButton
             android:id="@+id/button_plate_to_que"
