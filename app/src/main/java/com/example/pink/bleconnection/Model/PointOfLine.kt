@@ -2,7 +2,7 @@ package com.example.pink.bleconnection.Model
 
 import com.google.android.gms.maps.model.LatLng
 
-class PointOfLine(){
+class PointOfLine{
     private var local : LatLng = LatLng(0.0,0.0)
     private var nodePath : Array<Int> = arrayOf()
 

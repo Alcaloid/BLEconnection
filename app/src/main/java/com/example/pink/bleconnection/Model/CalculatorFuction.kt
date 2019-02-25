@@ -6,8 +6,8 @@ import com.google.android.gms.maps.model.LatLng
 import kotlin.math.min
 
 class CalculatorFunction(){
-    public fun calDistanceFromRSSI(rssi: Int,txPower:Int):Double{
-        val n: Int = 2
+    public fun calDistanceFromRSSI(rssi: Double,txPower:Int):Double{
+        val n: Int = 1
         val distance : Double = Math.pow(10.0,((txPower-rssi)/(10.0*n)))
         return distance
     }
@@ -22,8 +22,8 @@ class CalculatorFunction(){
         }
         return averageNumber
     }
-    public fun calLocation(x1:Int,x2:Int,x3:Int,
-                           y1:Int,y2:Int,y3:Int,
+    public fun calLocation(x1:Double,x2:Double,x3:Double,
+                           y1:Double,y2:Double,y3:Double,
                            distance1:Double,distance2:Double,distance3:Double) : LatLng{
         val valueA = (-2*x1) + (2*x2)
         val valueB = (-2*y1) + (2*y2)

@@ -22,6 +22,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.ArrayAdapter
+import com.example.pink.bleconnection.Model.BeaconDetail
 import com.example.pink.bleconnection.Model.CalculatorFunction
 import com.example.pink.bleconnection.Model.PointOfLine
 import com.karumi.dexter.Dexter
@@ -40,6 +41,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     private var mScanner : BluetoothLeScanner? = null
     private var mHandler: Handler? = null
     lateinit var scanSetting : ScanSettings
+    private var beaconDetail : ArrayList<BeaconDetail> = arrayListOf()
     private var beaconInformation : Array<IntArray> = arrayOf(
             //0,1 is x,y and 2 is txpower
             intArrayOf(0,0,-64), // beacon0
@@ -84,10 +86,10 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         mBluetoothManager = getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = mBluetoothManager?.adapter
         mapFragment.getMapAsync(this)
-
         button_background.setOnClickListener {
             calFunction.toast("Coming Soon",this@Maps2Activity)
         }
+        setBeaconInformation()
         searchOperation()
         navigationOperation()
     }
@@ -129,10 +131,8 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             }
         }
         settingAndCheckPermission()
-        //Testing
-//        myLocation = LatLng(3.75,2.75)
-//        isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation!!).title("MyPosition"))
     }
+
     private fun settingAndCheckPermission(){
         if(packageManager.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
             mBluetoothAdapter?.takeIf { !it.isEnabled }?.apply {
@@ -164,25 +164,38 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             super.onScanResult(callbackType, result)
             println("GetData->"+result.device.name+" Address:"+result.device.address)
             if(result.device.name == "RL0"){
-                beaconSignal[0].add(result.rssi)
+                beaconDetail[0].addSignal(result.rssi)
+//                beaconSignal[0].add(result.rssi)
             }else if (result.device.name == "RL1"){
-                beaconSignal[1].add(result.rssi)
+                beaconDetail[1].addSignal(result.rssi)
+//                beaconSignal[1].add(result.rssi)
             }else if (result.device.name == "RL2"){
-                beaconSignal[2].add(result.rssi)
+                beaconDetail[2].addSignal(result.rssi)
+//                beaconSignal[2].add(result.rssi)
             }else if (result.device.name == "RL3"){
-                beaconSignal[3].add(result.rssi)
+                beaconDetail[3].addSignal(result.rssi)
+//                beaconSignal[3].add(result.rssi)
             }
         }
     }
-    fun setStartData(){
-        for (i in 0..beaconSignal.size-1){
-            beaconSignal[i].clear()
-            dataDistance[i][1] = 1000.0
-        }
-        startScanner()
-    }
     fun findMyLocation(){
-        val averageSignal : Array<Int> = arrayOf(0,0,0,0)
+        var average : Double = 0.0
+        for (i in 0..beaconDetail.size){
+            average = beaconDetail[i].getAverageSignal()
+            if (average != 0.0){
+                //can get signal one or more
+                //find distance
+                dataDistance[i][1] = calFunction.calDistanceFromRSSI(average,beaconDetail[i].getPower())
+            }
+        }
+        distanceMinToMax()
+        if ((dataDistance[0][1] != 1000.0)&&(dataDistance[1][1]!=1000.0)&&(dataDistance[2][1]!=1000.0)){
+            markLocation(dataDistance[0][0].toInt(),dataDistance[1][0].toInt(),dataDistance[2][0].toInt(),
+                    dataDistance[0][1],dataDistance[1][1],dataDistance[2][1])
+        }else{
+            startScanner() //get more signal
+        }
+        /*val averageSignal : Array<Int> = arrayOf(0,0,0,0)
         for (i in 0..beaconSignal.size-1){
             averageSignal[i] = calFunction.calAverage(beaconSignal[i])
             if (averageSignal[i]!= -100000) {
@@ -195,7 +208,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
                     dataDistance[0][1],dataDistance[1][1],dataDistance[2][1])
         }else{
             startScanner() //get more signal
-        }
+        }*/
     }
     fun distanceMinToMax(){
         for (i in 0..dataDistance.size-1){
@@ -211,12 +224,12 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
     fun markLocation(beacon1:Int, beacon2:Int, beacon3:Int,distance1:Double,distance2:Double,distance3:Double){
-        val x1 = beaconInformation[beacon1][0]
-        val x2 = beaconInformation[beacon2][0]
-        val x3 = beaconInformation[beacon3][0]
-        val y1 = beaconInformation[beacon1][1]
-        val y2 = beaconInformation[beacon2][1]
-        val y3 = beaconInformation[beacon3][1]
+        val x1 = beaconDetail[beacon1].getPosition().latitude//beaconInformation[beacon1][0]
+        val x2 = beaconDetail[beacon2].getPosition().latitude//beaconInformation[beacon2][0]
+        val x3 = beaconDetail[beacon3].getPosition().latitude//beaconInformation[beacon3][0]
+        val y1 = beaconDetail[beacon1].getPosition().longitude//beaconInformation[beacon1][1]
+        val y2 = beaconDetail[beacon2].getPosition().longitude//beaconInformation[beacon2][1]
+        val y3 = beaconDetail[beacon3].getPosition().longitude//beaconInformation[beacon3][1]
         myLocation = calFunction.calLocation(x1,x2,x3,y1,y2,y3,distance1,distance2,distance3)
         if (isMyLocation != null){
             isMyLocation?.remove()
@@ -225,25 +238,74 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         count += 1
         setStartData()
     }
+    fun setStartData(){
+        for (i in 0..beaconDetail.size){
+            beaconDetail[i].clearSignal()
+            dataDistance[i][1] = 1000.0
+        }
+        /*for (i in 0..beaconSignal.size-1){
+            beaconSignal[i].clear()
+            dataDistance[i][1] = 1000.0
+        }*/
+        startScanner()
+    }
 
-    fun searchOperation(){
+    fun functionSearch(oprea : String){
         var buff : String = ""
+        when(oprea){
+            "open" -> {
+                searchBackground.setBackgroundColor(resources.getColor(R.color.angel_white))
+                search_font_2.visibility = View.GONE
+                search_back_2.visibility = View.VISIBLE
+                mListPlaceName.visibility = View.VISIBLE
+            }
+            "search" -> {
+                searchBackground.setBackgroundColor(Color.TRANSPARENT)
+                mListPlaceName.visibility = View.GONE
+                buff = editText_search_place_2.text.toString()
+                if (!buff.equals("")){
+                    checkSearch(buff)
+                }
+                search_back_2.visibility = View.GONE
+                search_font_2.visibility = View.VISIBLE
+            }
+            "found"->{
+                line_1.visibility = View.GONE
+                button_navigation.visibility = View.GONE
+                button_search_delete_text.visibility = View.VISIBLE
+                text_show_search.text = editText_search_place_2.text.toString()
+                text_show_search.setTextColor(Color.BLACK)
+            }
+            "close" -> {
+                searchBackground.setBackgroundColor(Color.TRANSPARENT)
+                mListPlaceName.visibility = View.GONE
+                search_back_2.visibility = View.GONE
+                button_search_delete_text.visibility = View.GONE
+                editText_search_place_2.text.clear()
+                if (searchMarker != null){
+                    searchMarker?.remove()
+                }
+
+                text_show_search.text = getString(R.string.searchtext)
+                text_show_search.setTextColor(Color.GRAY)
+
+                search_font_2.visibility = View.VISIBLE
+                line_1.visibility = View.VISIBLE
+                button_navigation.visibility = View.VISIBLE
+            }
+            else -> {
+                calFunction.toast("Set string error",this@Maps2Activity)
+                }
+        }
+    }
+    fun searchOperation(){
         val adapter = ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, placeName)
         mListPlaceName.setAdapter(adapter)
         text_show_search.setOnClickListener {
-            searchBackground.setBackgroundColor(resources.getColor(R.color.angel_white))
-            search_font_2.visibility = View.GONE
-            search_back_2.visibility = View.VISIBLE
-            mListPlaceName.visibility = View.VISIBLE
+            functionSearch("open")
         }
         search_back_to_font.setOnClickListener {
-            searchBackground.setBackgroundColor(Color.TRANSPARENT)
-            mListPlaceName.visibility = View.GONE
-            search_back_2.visibility = View.GONE
-            search_font_2.visibility = View.VISIBLE
-            if (searchMarker != null){
-                searchMarker?.remove()
-            }
+            functionSearch("close")
         }
         editText_search_place_2.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {}
@@ -253,24 +315,10 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             }
         })
         button_search.setOnClickListener {
-            searchBackground.setBackgroundColor(Color.TRANSPARENT)
-            mListPlaceName.visibility = View.GONE
-            buff = editText_search_place_2.text.toString()
-            if (!buff.equals("")){
-                checkSearch(buff)
-            }
-            search_back_2.visibility = View.GONE
-            search_font_2.visibility = View.VISIBLE
+            functionSearch("search")
         }
         button_search_delete_text.setOnClickListener {
-            button_search_delete_text.visibility = View.GONE
-            line_1.visibility = View.VISIBLE
-            button_navigation.visibility = View.VISIBLE
-            text_show_search.text = getString(R.string.searchtext)
-            text_show_search.setTextColor(Color.GRAY)
-            if (searchMarker != null){
-                searchMarker?.remove()
-            }
+            functionSearch("close")
         }
         mListPlaceName.setOnItemClickListener { parent, view, position, id ->
             editText_search_place_2.setText(adapter.getItem(position))
@@ -290,11 +338,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
     fun markSearchRoom(roomPosition : LatLng,roomName : String){
-        line_1.visibility = View.GONE
-        button_navigation.visibility = View.GONE
-        button_search_delete_text.visibility = View.VISIBLE
-        text_show_search.text = roomName
-        text_show_search.setTextColor(Color.BLACK)
+        functionSearch("found")
         if (searchMarker == null){
             searchMarker = mMap.addMarker(MarkerOptions().position(roomPosition).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title(roomName))
         }else{
@@ -317,7 +361,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             calFunction.toast("Coming Soon",this@Maps2Activity)
         }
     }
-
     fun createLine(target : LatLng,name : String){
         val lineOption = PolylineOptions().color(Color.RED)
         lineOption.add(myLocation)
@@ -359,6 +402,19 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         point.PointOfLine(latLng,path)
         pointOfLine.add(point)
     }
+
+    fun setBeaconInformation(){
+        addBeaconDetail(LatLng(0.0,0.0),-64)
+        addBeaconDetail(LatLng(15.0,0.0),-68)
+        addBeaconDetail(LatLng(0.0,11.0),-68)
+        addBeaconDetail(LatLng(15.0,11.0),-68)
+    }
+    fun addBeaconDetail(position: LatLng,power:Int){
+        val detail : BeaconDetail = BeaconDetail()
+        detail.Detail(position, power)
+        beaconDetail.add(detail)
+    }
+
     fun startScanner(){
         mHandler?.postDelayed({
             stopScanner()
