@@ -20,11 +20,11 @@ class BeaconDetail{
     fun getAverageSignal():Double{
         var average : Double = 0.0
         val size : Int = signal.size
+        if (size != 0)
+        {
         for (i in signal){
             average += i
         }
-        if (size != 0)
-        {
             average /= size
         }
         return average

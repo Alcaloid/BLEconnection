@@ -7,20 +7,100 @@
     android:orientation="vertical">
 
     <TextView
-        android:id="@+id/text_test"
+        android:id="@+id/textView3"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="queing!!" />
+
+    <TextView
+        android:id="@+id/text_que_current"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:text="Welcome to que page" />
-    <Button
-        android:id="@+id/noti1"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Test1" />
+        android:text="@string/current_que"
+        android:textColor="@color/common_google_signin_btn_text_dark_focused"
+        android:textSize="20sp" />
 
-    <Button
-        android:id="@+id/noti2"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Test2" />
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/round_text"
+            android:gravity="center"
+            android:text="@string/guide"
+            android:textColor="@color/angel_white"
+            android:textSize="30sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/text_que_waiting_number"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/ic_chevron_left_black_24dp"
+                android:drawableRight="@drawable/ic_chevron_right_black_24dp"
+                android:gravity="center"
+                android:text="@string/not_queing"
+                android:textColor="@color/jet_black"
+                android:textSize="20sp"/>
+
+            <TextView
+                android:id="@+id/text_que_wait"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/wait"
+                android:textColor="@color/jet_black"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_marginLeft="100dp"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/text_que_waiting_time"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawableLeft="@drawable/ic_chevron_left_black_24dp"
+                android:drawableRight="@drawable/ic_chevron_right_black_24dp"
+                android:gravity="center"
+                android:text="@string/not_queing"
+                android:textColor="@color/jet_black"
+                android:textSize="20sp" />
+
+            <TextView
+                android:id="@+id/text_que_waiting_around"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="center"
+                android:text="@string/waiting_time"
+                android:textColor="@color/jet_black"
+                android:textSize="15sp" />
+        </LinearLayout>
+    </LinearLayout>
+
 </LinearLayout>

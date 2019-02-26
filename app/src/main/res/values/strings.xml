@@ -12,4 +12,9 @@
     <string name="text_off">OFF</string>
     <string name="guide_to">Guide to</string>
     <string name="guide">Guide</string>
+    <string name="scan_qr">Scan QR Code To Queuing</string>
+    <string name="current_que">Current Queue</string>
+    <string name="wait">Wait</string>
+    <string name="waiting_time">Wait around</string>
+    <string name="not_queing"> ---- </string>
 </resources>

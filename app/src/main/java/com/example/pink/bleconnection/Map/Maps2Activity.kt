@@ -42,25 +42,12 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     private var mHandler: Handler? = null
     lateinit var scanSetting : ScanSettings
     private var beaconDetail : ArrayList<BeaconDetail> = arrayListOf()
-    private var beaconInformation : Array<IntArray> = arrayOf(
-            //0,1 is x,y and 2 is txpower
-            intArrayOf(0,0,-64), // beacon0
-            intArrayOf(15,0,-68), // beacon1
-            intArrayOf(0,11,-68), // beacon2
-            intArrayOf(15,11,-68)  // beacon3
-    )
     private var dataDistance : Array<DoubleArray> = arrayOf(
             //0 is uuid and 1 is distance
             doubleArrayOf(0.0,1000.0),
             doubleArrayOf(1.0,1000.0),
             doubleArrayOf(2.0,1000.0),
             doubleArrayOf(3.0,1000.0)
-    )
-    private var beaconSignal : Array<ArrayList<Int>> = arrayOf(
-            arrayListOf(),
-            arrayListOf(),
-            arrayListOf(),
-            arrayListOf()
     )
     private var pointOfLine : ArrayList<PointOfLine> = arrayListOf()
     private var placeName : ArrayList<String> = arrayListOf(
@@ -162,25 +149,21 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     private var leScanCallBack = object : ScanCallback(){
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
-            println("GetData->"+result.device.name+" Address:"+result.device.address)
+//            println("GetData->"+result.device.name+" Address:"+result.device.address)
             if(result.device.name == "RL0"){
                 beaconDetail[0].addSignal(result.rssi)
-//                beaconSignal[0].add(result.rssi)
             }else if (result.device.name == "RL1"){
                 beaconDetail[1].addSignal(result.rssi)
-//                beaconSignal[1].add(result.rssi)
             }else if (result.device.name == "RL2"){
                 beaconDetail[2].addSignal(result.rssi)
-//                beaconSignal[2].add(result.rssi)
             }else if (result.device.name == "RL3"){
                 beaconDetail[3].addSignal(result.rssi)
-//                beaconSignal[3].add(result.rssi)
             }
         }
     }
     fun findMyLocation(){
         var average : Double = 0.0
-        for (i in 0..beaconDetail.size){
+        for (i in 0..beaconDetail.size-1){
             average = beaconDetail[i].getAverageSignal()
             if (average != 0.0){
                 //can get signal one or more
@@ -195,20 +178,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         }else{
             startScanner() //get more signal
         }
-        /*val averageSignal : Array<Int> = arrayOf(0,0,0,0)
-        for (i in 0..beaconSignal.size-1){
-            averageSignal[i] = calFunction.calAverage(beaconSignal[i])
-            if (averageSignal[i]!= -100000) {
-                dataDistance[i][1] = calFunction.calDistanceFromRSSI(averageSignal[i],beaconInformation[i][2])
-            }
-        }
-        distanceMinToMax()
-        if ((dataDistance[0][1] != 1000.0)&&(dataDistance[1][1]!=1000.0)&&(dataDistance[2][1]!=1000.0)){
-            markLocation(dataDistance[0][0].toInt(),dataDistance[1][0].toInt(),dataDistance[2][0].toInt(),
-                    dataDistance[0][1],dataDistance[1][1],dataDistance[2][1])
-        }else{
-            startScanner() //get more signal
-        }*/
     }
     fun distanceMinToMax(){
         for (i in 0..dataDistance.size-1){
@@ -224,12 +193,12 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
     fun markLocation(beacon1:Int, beacon2:Int, beacon3:Int,distance1:Double,distance2:Double,distance3:Double){
-        val x1 = beaconDetail[beacon1].getPosition().latitude//beaconInformation[beacon1][0]
-        val x2 = beaconDetail[beacon2].getPosition().latitude//beaconInformation[beacon2][0]
-        val x3 = beaconDetail[beacon3].getPosition().latitude//beaconInformation[beacon3][0]
-        val y1 = beaconDetail[beacon1].getPosition().longitude//beaconInformation[beacon1][1]
-        val y2 = beaconDetail[beacon2].getPosition().longitude//beaconInformation[beacon2][1]
-        val y3 = beaconDetail[beacon3].getPosition().longitude//beaconInformation[beacon3][1]
+        val x1 = beaconDetail[beacon1].getPosition().latitude
+        val x2 = beaconDetail[beacon2].getPosition().latitude
+        val x3 = beaconDetail[beacon3].getPosition().latitude
+        val y1 = beaconDetail[beacon1].getPosition().longitude
+        val y2 = beaconDetail[beacon2].getPosition().longitude
+        val y3 = beaconDetail[beacon3].getPosition().longitude
         myLocation = calFunction.calLocation(x1,x2,x3,y1,y2,y3,distance1,distance2,distance3)
         if (isMyLocation != null){
             isMyLocation?.remove()
@@ -239,14 +208,10 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         setStartData()
     }
     fun setStartData(){
-        for (i in 0..beaconDetail.size){
+        for (i in 0..beaconDetail.size-1){
             beaconDetail[i].clearSignal()
             dataDistance[i][1] = 1000.0
         }
-        /*for (i in 0..beaconSignal.size-1){
-            beaconSignal[i].clear()
-            dataDistance[i][1] = 1000.0
-        }*/
         startScanner()
     }
 

@@ -24,12 +24,12 @@ class QueFragment : Fragment(){
         super.onViewCreated(view, savedInstanceState)
         val calFuction : CalculatorFunction = CalculatorFunction()
         calFuction.toast("On Start",view.context)
-        view.noti1.setOnClickListener {
+        /*view.noti1.setOnClickListener {
             showNotification("Testing1","Complete",view.context)
         }
         view.noti2.setOnClickListener {
             showNotification("Testing2","New Carry",view.context)
-        }
+        }*/
     }
     fun showNotification(textTitle : String,textContent : String,context: Context){
         val notificationManager = activity?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager

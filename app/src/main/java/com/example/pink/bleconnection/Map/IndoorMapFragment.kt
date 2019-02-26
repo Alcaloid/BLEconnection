@@ -56,7 +56,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
     )
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        val view = inflater.inflate(R.layout.crazylayout, container, false)
+        val view = inflater.inflate(R.layout.fragment_map, container, false)
         return view
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -81,13 +81,13 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         mMap = googleMap
         mMap.mapType = GoogleMap.MAP_TYPE_NONE
         mMap.addGroundOverlay(mapGroundOverLay)
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationZoom,10f))
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(locationZoom,4f))
         mMap.setLatLngBoundsForCameraTarget(cameraTraget)
         mMap.uiSettings.isRotateGesturesEnabled = false
         mMap.uiSettings.isMapToolbarEnabled = false
         mMap.setOnCameraChangeListener {
             val maxZoom = 12.0f;
-            val minZoom = 5.0f
+            val minZoom = 3.0f
             if (mMap.cameraPosition.zoom > maxZoom){
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(maxZoom))
             }else if(mMap.cameraPosition.zoom < minZoom){
