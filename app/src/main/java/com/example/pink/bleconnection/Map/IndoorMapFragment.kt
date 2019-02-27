@@ -22,6 +22,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import com.example.pink.bleconnection.Model.PointOfLine
+import com.example.pink.bleconnection.Model.RoomDetail
 
 import com.example.pink.bleconnection.R
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -46,14 +48,15 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var mHandler: Handler
     private lateinit var scanSetting : ScanSettings
 
+    private var pointOfLine : ArrayList<PointOfLine> = arrayListOf()
+    private var roomDetail : ArrayList<RoomDetail> = arrayListOf()
+
     private var showMyLocation : Boolean = false
     private var showNavigation : Boolean = false
     private var searchMarker : Marker? = null
     private var myLocation : LatLng? = null
     private var polyLine : Polyline? = null
-    private var placeName : ArrayList<String> = arrayListOf(
-            "ZoneA","ZoneB","ZoneC","ZoneD"
-    )
+    private var placeName : ArrayList<String> = arrayListOf()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_map, container, false)
@@ -63,17 +66,17 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState)
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapview) as SupportMapFragment
         mapFragment.getMapAsync(this)
+        searchOperation(view.context)
         mBluetoothManager = activity?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = mBluetoothManager.adapter
         mHandler = Handler()
-        searchOperation(view.context)
     }
     override fun onMapReady(googleMap: GoogleMap) {
         val testingRoom = LatLngBounds(
                 LatLng(0.0, 0.0),
-                LatLng(60.0,35.0))
+                LatLng(70.0,36.0))
         val mapGroundOverLay = GroundOverlayOptions()
-                .image(BitmapDescriptorFactory.fromResource(R.drawable.floor11))
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.seniortesting))
                 .positionFromBounds(testingRoom).zIndex(1f)
         val locationZoom = LatLng(7.5,5.5)
         val cameraTraget = LatLngBounds(
@@ -94,140 +97,140 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(minZoom))
             }
         }
-
-//        checkPermission()
-    }
-    override fun onDestroy() {
-        super.onDestroy()
-        if (showMyLocation){
-            mScanner.stopScan(leScanCallBack)
-        }
+        setPoint()
+        setRoomDetail()
     }
 
-    private fun checkPermission(){
-        if(activity?.packageManager!!.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
-            if (!mBluetoothAdapter.isEnabled){
-                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
-                startActivityForResult(enableBtIntent, 1)
-            }
-            Dexter.withActivity(context as Activity)
-                    .withPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
-                    .withListener(object : PermissionListener {
-                        override fun onPermissionGranted(response: PermissionGrantedResponse?) {
-                            mScanner = mBluetoothAdapter.bluetoothLeScanner
-                            scanSetting = ScanSettings.Builder().setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY).build()
-                            startScanner()
-                        }
-                        override fun onPermissionDenied(response: PermissionDeniedResponse?) {
-                            toast("Navigator system need location permission")
-                        }
-                        override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest, token: PermissionToken) {
-                            token.continuePermissionRequest()
-                        }
-                    }).check()
-        }else{
-            toast("This Device can't support BLE")
-        }
-    }
-    private var leScanCallBack = object : ScanCallback(){
-        override fun onScanResult(callbackType: Int, result: ScanResult) {
-            super.onScanResult(callbackType, result)
-            println("GetData->"+result.device.name+" Address:"+result.device.address)
-            if(result.device.name == "RL0"){
-//                beaconSignal[0].add(result.rssi)
-            }else if (result.device.name == "RL1"){
-//                beaconSignal[1].add(result.rssi)
-            }else if (result.device.name == "RL2"){
-//                beaconSignal[2].add(result.rssi)
-            }else if (result.device.name == "RL3"){
-//                beaconSignal[3].add(result.rssi)
-            }
-        }
-    }
-    private fun startScanner(){
-        mHandler.postDelayed({
-            stopScanner()
-            //findMyLocation()
-        },5000)
-        mScanner.startScan(null,scanSetting,leScanCallBack)
-    }
-    private fun stopScanner(){
-        mScanner.stopScan(leScanCallBack)
-    }
-
-    private fun searchOperation(context: Context){
+    fun functionSearch(oprea : String){
         var buff : String = ""
+        when(oprea){
+            "open" -> {
+                searchBackground.setBackgroundColor(resources.getColor(R.color.angel_white))
+                search_font_2.visibility = View.GONE
+                search_back_2.visibility = View.VISIBLE
+                mListPlaceName.visibility = View.VISIBLE
+            }
+            "search" -> {
+                searchBackground.setBackgroundColor(Color.TRANSPARENT)
+                mListPlaceName.visibility = View.GONE
+                buff = editText_search_place_2.text.toString()
+                if (!buff.equals("")){
+                    checkSearch(buff)
+                }
+                search_back_2.visibility = View.GONE
+                search_font_2.visibility = View.VISIBLE
+            }
+            "found"->{
+                line_1.visibility = View.GONE
+                button_navigation.visibility = View.GONE
+                button_search_delete_text.visibility = View.VISIBLE
+                text_show_search.text = editText_search_place_2.text.toString()
+                text_show_search.setTextColor(Color.BLACK)
+            }
+            "close" -> {
+                searchBackground.setBackgroundColor(Color.TRANSPARENT)
+                mListPlaceName.visibility = View.GONE
+                search_back_2.visibility = View.GONE
+                button_search_delete_text.visibility = View.GONE
+                editText_search_place_2.text.clear()
+                if (searchMarker != null){
+                    searchMarker?.remove()
+                }
+
+                text_show_search.text = getString(R.string.searchtext)
+                text_show_search.setTextColor(Color.GRAY)
+
+                search_font_2.visibility = View.VISIBLE
+                line_1.visibility = View.VISIBLE
+                button_navigation.visibility = View.VISIBLE
+            }
+            else -> {
+                toast("Set string error")
+            }
+        }
+    }
+    fun searchOperation(context: Context){
         val adapter = ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, placeName)
         mListPlaceName.setAdapter(adapter)
-        button_map_start_search.setOnClickListener {
-            searchBackground.setBackgroundColor(resources.getColor(R.color.angel_white))
-            search_font.visibility = View.GONE
-            search_backend.visibility = View.VISIBLE
-            mListPlaceName.visibility = View.VISIBLE
+        text_show_search.setOnClickListener {
+            functionSearch("open")
         }
-        button_search_closer.setOnClickListener {
-            searchBackground.setBackgroundColor(Color.TRANSPARENT)
-            buff = editText_search_place.text.toString()
-            if (!buff.equals("")){
-                checkSearch(buff)
-            }
-            mListPlaceName.visibility = View.GONE
-            search_backend.visibility = View.GONE
-            search_font.visibility = View.VISIBLE
+        search_back_to_font.setOnClickListener {
+            functionSearch("close")
         }
-        editText_search_place.addTextChangedListener(object : TextWatcher {
+        editText_search_place_2.addTextChangedListener(object : TextWatcher {
             override fun afterTextChanged(p0: Editable?) {}
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int){}
             override fun onTextChanged(str: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 adapter.filter.filter(str)
             }
         })
+        button_search.setOnClickListener {
+            functionSearch("search")
+        }
+        button_search_delete_text.setOnClickListener {
+            functionSearch("close")
+        }
         mListPlaceName.setOnItemClickListener { parent, view, position, id ->
-            editText_search_place.setText(adapter.getItem(position))
+            editText_search_place_2.setText(adapter.getItem(position))
         }
     }
-    private fun checkSearch(string: String){
+    fun checkSearch(string: String){
         val buff = string.toLowerCase()
-        when(buff){
-            "zonea" -> markSearchRoom(LatLng(3.75,2.75),"ZoneA")
-            "zoneb" -> markSearchRoom(LatLng(11.25,2.75),"ZoneB")
-            "zonec" -> markSearchRoom(LatLng(3.75,8.25),"ZoneC")
-            "zoned" -> markSearchRoom(LatLng(11.25,8.25),"ZoneD")
-            else -> {
-                if (searchMarker != null) searchMarker?.remove()
-                toast("Doesn't found room")
+        for (i in roomDetail){
+            if (buff == i.getRoomName().toLowerCase()){
+                markSearchRoom(i.getRoomPosition(),i.getRoomName())
+                break
             }
         }
     }
-    private fun markSearchRoom(roomPosition : LatLng,roomName : String){
+    fun markSearchRoom(roomPosition : LatLng,roomName : String){
+        functionSearch("found")
         if (searchMarker == null){
             searchMarker = mMap.addMarker(MarkerOptions().position(roomPosition).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title(roomName))
         }else{
             searchMarker?.remove()
             searchMarker = mMap.addMarker(MarkerOptions().position(roomPosition).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title(roomName))
         }
-        if (myLocation != null){
-            createLine(roomPosition,roomName)
-        }
     }
-    private fun createLine(target : LatLng,name : String){
-        val lineOption = PolylineOptions().color(Color.RED)
-        lineOption.add(myLocation)
-        //wait for edit
-        when(name){
-            "ZoneA" -> lineOption.add(LatLng(5.5,3.75))
-            "ZoneB" -> lineOption.add(LatLng(7.5,8.0))
-        }
-        lineOption.add(target)
-        if (polyLine == null){
-            polyLine = mMap.addPolyline(lineOption)
-        }else{
-            polyLine?.remove()
-            polyLine =  mMap.addPolyline(lineOption)
-        }
-//        mMap.addPolyline(PolylineOptions().geodesic(true).add(myLocation).add(target))
+    fun setRoomDetail(){
+        addRoomDetail("1101:Lab", LatLng(63.0,5.0))
+        addRoomDetail("1102:Graduation Common Room",LatLng(63.0,11.0))
+        addRoomDetail("Toilet Man(1)",LatLng(65.0,31.0))
+        addRoomDetail("Toilet Woman(1)",LatLng(61.0,31.0))
+        addRoomDetail("1111/1:iNeng Lab",LatLng(55.0,7.0))
+        addRoomDetail("1111/2:Lab",LatLng(55.0,13.0))
+        addRoomDetail("CPE 1112:Computer room1",LatLng(47.0,10.0))
+        addRoomDetail("CPE 1113:Computer room2",LatLng(39.0,10.0))
+        addRoomDetail("CPE 1114:Class room",LatLng(31.0,10.0))
+        addRoomDetail("CPE 1115:Class room",LatLng(23.0,10.0))
+        addRoomDetail("CPE 1116:Class room",LatLng(15.0,10.0))
+        addRoomDetail("CPE 1117:Lab",LatLng(55.0,28.0))
+        addRoomDetail("CPE 1118:Lab embedded",LatLng(47.0,28.0))
+        addRoomDetail("CPE 1119:Lab electronic",LatLng(39.0,28.0))
+        addRoomDetail("CPE 1120:Lab network",LatLng(31.0,28.0))
+        addRoomDetail("CPE 1121:Class room",LatLng(23.0,28.0))
+        addRoomDetail("CPE 1122:Server room&IT Admin",LatLng(15.0,28.0))
+        addRoomDetail("Toilet Man(2)",LatLng(9.5,5.0))
+        addRoomDetail("Toilet Woman(2)",LatLng(4.5,5.0))
+        addRoomDetail("1130:Cast Lab",LatLng(5.5,28.0))
+        addRoomDetail("1131:Cast Lab",LatLng(5.5,32.0))
     }
+    fun addRoomDetail(name:String,position:LatLng){
+        val room : RoomDetail = RoomDetail()
+        room.RoomDetail(name,position)
+        placeName.add(name)
+        //mMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).position(position).title(name))
+        roomDetail.add(room)
+    }
+    fun setPoint(){
 
+    }
+    fun addPoint(latLng: LatLng,path: Array<Int>){
+        val point : PointOfLine = PointOfLine()
+        point.PointOfLine(latLng,path)
+        pointOfLine.add(point)
+    }
     fun toast(text : String){
         Toast.makeText(context,text, Toast.LENGTH_SHORT).show()
     }
