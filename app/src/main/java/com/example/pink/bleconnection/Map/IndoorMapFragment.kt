@@ -77,7 +77,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
                 LatLng(70.0,36.0))
         val mapGroundOverLay = GroundOverlayOptions()
                 .image(BitmapDescriptorFactory.fromResource(R.drawable.seniortesting))
-                .positionFromBounds(testingRoom).zIndex(1f)
+                .positionFromBounds(testingRoom).zIndex(0f)
         val locationZoom = LatLng(7.5,5.5)
         val cameraTraget = LatLngBounds(
                 LatLng(-0.01,-0.01), LatLng(90.001, 90.001))
@@ -99,6 +99,11 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         }
         setPoint()
         setRoomDetail()
+        //Test
+        myLocation = LatLng(9.0,18.0)
+        switchMyLocal()
+        mMap.addMarker(MarkerOptions().position(myLocation!!).title("MyLocal"))
+        navigationOperation()
     }
 
     fun functionSearch(oprea : String){
@@ -115,7 +120,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
                 mListPlaceName.visibility = View.GONE
                 buff = editText_search_place_2.text.toString()
                 if (!buff.equals("")){
-                    checkSearch(buff)
+                    checkSearch(buff,"Search")
                 }
                 search_back_2.visibility = View.GONE
                 search_font_2.visibility = View.VISIBLE
@@ -175,17 +180,25 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
             editText_search_place_2.setText(adapter.getItem(position))
         }
     }
-    fun checkSearch(string: String){
+    fun checkSearch(string: String,option:String){
         val buff = string.toLowerCase()
         for (i in roomDetail){
             if (buff == i.getRoomName().toLowerCase()){
-                markSearchRoom(i.getRoomPosition(),i.getRoomName())
+                if (option == "Search"){
+                    markSearchRoom(i.getRoomPosition(),i.getRoomName(),option)
+                }else if (option == "Navigation"){
+                    markSearchRoom(i.getRoomPosition(),i.getRoomName(),option)
+                    println("Mark Pass")
+                    createLine(i.getRoomPosition(),i.getRoomName())
+                }
                 break
             }
         }
     }
-    fun markSearchRoom(roomPosition : LatLng,roomName : String){
-        functionSearch("found")
+    fun markSearchRoom(roomPosition : LatLng,roomName : String,option: String){
+        if (option == "Search"){
+            functionSearch("found")
+        }
         if (searchMarker == null){
             searchMarker = mMap.addMarker(MarkerOptions().position(roomPosition).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title(roomName))
         }else{
@@ -193,6 +206,66 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
             searchMarker = mMap.addMarker(MarkerOptions().position(roomPosition).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title(roomName))
         }
     }
+
+    fun switchMyLocal(){
+        var near : Double = 100000.0
+        var distance : Double = 0.0
+        var point : LatLng
+        var nearLocal : LatLng = LatLng(0.0,0.0)
+        for(i in pointOfLine.indices){
+            point = pointOfLine[i].getLocal()
+            distance = distanceFromPoint(myLocation!!.latitude,point.latitude,myLocation!!.longitude,point.longitude)
+            if (distance < near){
+                near = distance
+                nearLocal = point
+            }
+        }
+        myLocation = nearLocal
+    }
+    fun distanceFromPoint(X1:Double,X2:Double,Y1:Double,Y2:Double):Double{
+        val distance : Double = Math.sqrt(Math.pow(X1-X2,2.0)+Math.pow(Y1-Y2,2.0))
+        return distance
+    }
+
+    fun navigationOperation(){
+        button_navigation.setOnClickListener {
+            navigation_background.visibility = View.VISIBLE
+            search_font_2.visibility = View.GONE
+        }
+        navigation_back_to_search.setOnClickListener {
+            if (polyLine!=null){
+                polyLine?.remove()
+            }
+            if (searchMarker!=null){
+                searchMarker?.remove()
+            }
+            navigation_background.visibility = View.GONE
+            search_font_2.visibility = View.VISIBLE
+        }
+        button_set_navigation.setOnClickListener {
+            val buff : String = editText_navigation.text.toString()
+            checkSearch(buff,"Navigation")
+        }
+    }
+    fun createLine(target : LatLng,name : String){
+        val lineOption = PolylineOptions().color(Color.RED)
+        var pathArray : ArrayList<LatLng> = arrayListOf()
+        var position : LatLng = myLocation!!
+        while (position != target){
+
+        }
+        /*lineOption.add(myLocation)
+
+        lineOption.add(target)*/
+        if (polyLine == null){
+            polyLine = mMap.addPolyline(lineOption)
+        }else{
+            polyLine?.remove()
+            polyLine =  mMap.addPolyline(lineOption)
+        }
+//        mMap.addPolyline(PolylineOptions().geodesic(true).add(myLocation).add(target))
+    }
+
     fun setRoomDetail(){
         addRoomDetail("1101:Lab", LatLng(63.0,5.0))
         addRoomDetail("1102:Graduation Common Room",LatLng(63.0,11.0))
@@ -211,8 +284,8 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         addRoomDetail("CPE 1120:Lab network",LatLng(31.0,28.0))
         addRoomDetail("CPE 1121:Class room",LatLng(23.0,28.0))
         addRoomDetail("CPE 1122:Server room&IT Admin",LatLng(15.0,28.0))
-        addRoomDetail("Toilet Man(2)",LatLng(9.5,5.0))
-        addRoomDetail("Toilet Woman(2)",LatLng(4.5,5.0))
+        addRoomDetail("Toilet Woman(2)",LatLng(9.5,5.0))
+        addRoomDetail("Toilet Man(2)",LatLng(4.5,5.0))
         addRoomDetail("1130:Cast Lab",LatLng(5.5,28.0))
         addRoomDetail("1131:Cast Lab",LatLng(5.5,32.0))
     }
@@ -224,7 +297,55 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         roomDetail.add(room)
     }
     fun setPoint(){
-
+        //1-5
+        addPoint(LatLng(7.0,18.0), arrayOf(2))
+        addPoint(LatLng(12.0,18.0), arrayOf(1,3,8))
+        addPoint(LatLng(12.0,12.0), arrayOf(2,4))
+        addPoint(LatLng(9.5,12.0), arrayOf(3,5,6))
+        addPoint(LatLng(4.5,12.0), arrayOf(4,7))
+        //6-10
+        addPoint(LatLng(9.5,5.0), arrayOf(4)) //toilet woman2
+        addPoint(LatLng(4.5,5.0), arrayOf(5)) //toilet man2
+        addPoint(LatLng(12.0,28.0), arrayOf(2,9,10,40))
+        addPoint(LatLng(15.0,28.0), arrayOf(8)) //CPE 1122:Server room&IT Admin
+        addPoint(LatLng(5.5,28.0), arrayOf(8)) //1130:Cast Lab
+        //11-15
+        addPoint(LatLng(5.5,32.0), arrayOf(40)) //1131:Cast Lab
+        addPoint(LatLng(15.0,18.0), arrayOf(2,13,14))
+        addPoint(LatLng(15.0,10.0), arrayOf(12)) //CPE 1116:Class room
+        addPoint(LatLng(19.0,18.0), arrayOf(12,15,16,17))
+        addPoint(LatLng(23.0,10.0), arrayOf(14))
+        //16-20
+        addPoint(LatLng(23.0,28.0), arrayOf(14)) //CPE 1121:Class room
+        addPoint(LatLng(31.0,18.0), arrayOf(14,18,19,20))
+        addPoint(LatLng(31.0,10.0), arrayOf(17)) // 1114:Class room
+        addPoint(LatLng(31.0,28.0), arrayOf(17)) //CPE 1120:Lab network
+        addPoint(LatLng(39.0,18.0), arrayOf(17,21,22,23))
+        //21-25
+        addPoint(LatLng(39.0,10.0), arrayOf(20)) //com 2
+        addPoint(LatLng(39.0,28.0), arrayOf(20)) //ele lab
+        addPoint(LatLng(47.0,18.0), arrayOf(20,24,25,26))
+        addPoint(LatLng(47.0,10.0), arrayOf(23))
+        addPoint(LatLng(47.0,28.0), arrayOf(23))
+        //26-30
+        addPoint(LatLng(55.0,18.0), arrayOf(23,27,28,29))
+        addPoint(LatLng(55.0,13.0), arrayOf(26)) //lab
+        addPoint(LatLng(55.0,28.0), arrayOf(26)) //lab
+        addPoint(LatLng(57.5,18.0), arrayOf(26,30,31,35))
+        addPoint(LatLng(63.0,18.0), arrayOf(29))
+        //31-35
+        addPoint(LatLng(57.5,8.0), arrayOf(29,32,41))
+        addPoint(LatLng(63.0,11.0), arrayOf(31)) //1102:Graduation Common Room
+        addPoint(LatLng(63.0,5.0), arrayOf(41)) //Lab
+        addPoint(LatLng(55.0,7.0), arrayOf(41)) //1111/1:iNeng Lab
+        addPoint(LatLng(57.5,25.0), arrayOf(29,36))
+        //36-41
+        addPoint(LatLng(61.0,25.0), arrayOf(35,37,38))
+        addPoint(LatLng(65.0,25.0), arrayOf(36,39))
+        addPoint(LatLng(61.0,31.0), arrayOf(36)) // toilet woman1
+        addPoint(LatLng(65.0,31.0), arrayOf(37)) // totlet man1
+        addPoint(LatLng(12.0,31.0), arrayOf(8,11))
+        addPoint(LatLng(57.5,5.0), arrayOf(31,33,34))
     }
     fun addPoint(latLng: LatLng,path: Array<Int>){
         val point : PointOfLine = PointOfLine()
