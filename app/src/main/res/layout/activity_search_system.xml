@@ -8,42 +8,16 @@
     tools:context=".SearchSystemActivity"
     android:id="@+id/serachBackground">
 
-    <com.mancj.materialsearchbar.MaterialSearchBar
-        android:id="@+id/searchBar"
+    <TextView
+        android:id="@+id/text_rand"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:animateLayoutChanges="false"
-        android:clickable="false"
-        android:visibility="gone"
-        app:mt_hint="Serach Room"
-        app:mt_maxSuggestionsCount="0"
-        app:mt_speechMode="false">
+        android:gravity="center"
+        android:text="TextView" />
 
-    </com.mancj.materialsearchbar.MaterialSearchBar>
-
-    <EditText
-        android:id="@+id/editText_search"
+    <Button
+        android:id="@+id/button_random"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:ems="10"
-        android:hint="Search Room"
-        android:inputType="text" />
-
-    <ListView
-        android:id="@+id/mListView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone"
-        >
-    </ListView>
-
-    <com.mancj.materialsearchbar.MaterialSearchBar
-        style="@style/MaterialSearchBarLight"
-        app:mt_speechMode="true"
-        app:mt_hint="Custom hint"
-        app:mt_maxSuggestionsCount="10"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:id="@+id/searchBar" />
-
+        android:text="Rand" />
 </LinearLayout>

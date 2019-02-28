@@ -38,6 +38,8 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import kotlinx.android.synthetic.main.fragment_map.*
+import java.util.*
+import kotlin.collections.ArrayList
 
 class IndoorMapFragment : Fragment(), OnMapReadyCallback {
 
@@ -231,6 +233,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         button_navigation.setOnClickListener {
             navigation_background.visibility = View.VISIBLE
             search_font_2.visibility = View.GONE
+            mListPlaceName.visibility = View.VISIBLE
         }
         navigation_back_to_search.setOnClickListener {
             if (polyLine!=null){
@@ -239,23 +242,79 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
             if (searchMarker!=null){
                 searchMarker?.remove()
             }
+            mListPlaceName.visibility = View.GONE
             navigation_background.visibility = View.GONE
             search_font_2.visibility = View.VISIBLE
         }
         button_set_navigation.setOnClickListener {
+            mListPlaceName.visibility = View.GONE
+//            toast("Coming Soon")
+
             val buff : String = editText_navigation.text.toString()
             checkSearch(buff,"Navigation")
         }
     }
     fun createLine(target : LatLng,name : String){
         val lineOption = PolylineOptions().color(Color.RED)
-        var pathArray : ArrayList<LatLng> = arrayListOf()
         var position : LatLng = myLocation!!
-        while (position != target){
-
+        var currentPosition : Int = 0
+        var prePosition : Int? = null
+        val arrayPath : ArrayList<LatLng> = arrayListOf()
+        var pathOfPoint : Array<Int> = arrayOf()
+        var count : Int = 0
+        var rand : Int
+        var point : Int
+//        println("Start Position:"+position)
+        if (position == target) lineOption.add(position)
+        else{
+            while (position != target) {
+                println("Position:" + position)
+                arrayPath.add(position)
+                for (i in pointOfLine.indices) {
+                    if (position == pointOfLine[i].getLocal()) {
+                        pathOfPoint = pointOfLine[i].getPath()
+                        currentPosition = i
+                        break
+                    }
+                }
+                rand = Random().nextInt(pathOfPoint.size)
+                point = pathOfPoint[rand]
+                if (prePosition==null){
+                    position = pointOfLine[point].getLocal()
+                    prePosition = currentPosition
+                }else{
+                    count = 0
+                    while (point == prePosition){
+                        rand = Random().nextInt(pathOfPoint.size)
+                        point = pathOfPoint[rand]
+                        count += 1
+                        if (count == 10){
+                            break
+                        }
+                    }
+                    if (point != prePosition){
+                        position = pointOfLine[point].getLocal()
+                        prePosition = currentPosition
+                    }else break
+                    /*if (count == 10){
+                        position = myLocation!!
+                        arrayPath.clear()
+                    }else{
+                        position = pointOfLine[point].getLocal()
+                        prePosition = currentPosition
+                    }*/
+                }
+            }
         }
+//        println("Array Size"+arrayPath.size)
+        if (arrayPath.size != 0){
+            for(i in arrayPath){
+//                println("path:"+i)
+                lineOption.add(i)
+            }
+        }
+        lineOption.add(target)
         /*lineOption.add(myLocation)
-
         lineOption.add(target)*/
         if (polyLine == null){
             polyLine = mMap.addPolyline(lineOption)
@@ -263,7 +322,6 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
             polyLine?.remove()
             polyLine =  mMap.addPolyline(lineOption)
         }
-//        mMap.addPolyline(PolylineOptions().geodesic(true).add(myLocation).add(target))
     }
 
     fun setRoomDetail(){
@@ -297,6 +355,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         roomDetail.add(room)
     }
     fun setPoint(){
+        addPoint(LatLng(0.0,0.0), arrayOf(0)) // i forgot array start 0 T-T
         //1-5
         addPoint(LatLng(7.0,18.0), arrayOf(2))
         addPoint(LatLng(12.0,18.0), arrayOf(1,3,8))
@@ -349,6 +408,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
     }
     fun addPoint(latLng: LatLng,path: Array<Int>){
         val point : PointOfLine = PointOfLine()
+//        mMap.addMarker(MarkerOptions().position(latLng).title(latLng.toString()))
         point.PointOfLine(latLng,path)
         pointOfLine.add(point)
     }
