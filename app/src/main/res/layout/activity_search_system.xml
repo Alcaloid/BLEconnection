@@ -5,19 +5,43 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context=".SearchSystemActivity"
+    tools:context=".TestDatabase"
     android:id="@+id/serachBackground">
 
-    <TextView
-        android:id="@+id/text_rand"
+    <Button
+        android:id="@+id/button_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="TextView" />
+        android:text="Login" />
+
+    <TextView
+        android:id="@+id/text_your_que"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Your Que is" />
 
     <Button
-        android:id="@+id/button_random"
+        android:id="@+id/button_queue"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Rand" />
+        android:text="Que" />
+
+    <TextView
+        android:id="@+id/text_current_que"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Next_que" />
+
+    <Button
+        android:id="@+id/button_next_que"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Next" />
+
+    <Button
+        android:id="@+id/button_restart"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Restart" />
+
 </LinearLayout>

@@ -22,7 +22,7 @@ import android.support.v4.app.ActivityCompat
 import android.support.v7.app.AlertDialog
 
 
-class TestPermission : AppCompatActivity(){
+class TestFunction : AppCompatActivity(){
     lateinit var mBluetoothManager : BluetoothManager
     lateinit var mBluetoothAdapter : BluetoothAdapter
     lateinit var mScanner : BluetoothLeScanner

@@ -51,8 +51,8 @@
             android:label="@string/title_activity_maps2"
             android:screenOrientation="portrait" />
         <activity android:name=".BLEScanner.BLEscannerNewVersionActivity" />
-        <activity android:name=".SearchSystemActivity" />
-        <activity android:name=".TestPermission" />
+        <activity android:name=".TestDatabase" />
+        <activity android:name=".TestFunction" />
 
         <activity android:name=".PlateActivity"></activity>
     </application>

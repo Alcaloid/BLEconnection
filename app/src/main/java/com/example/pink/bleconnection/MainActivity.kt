@@ -14,7 +14,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         var intent : Intent
         button_main.setOnClickListener {
-            intent = Intent(this, TestPermission::class.java)
+            intent = Intent(this, TestFunction::class.java)
             startActivity(intent)
         }
         BLEbutton.setOnClickListener {
@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
             startActivity(intent)
         }
         mapbutton.setOnClickListener {
-            intent = Intent(this, SearchSystemActivity::class.java)
+            intent = Intent(this, TestDatabase::class.java)
             startActivity(intent)
         }
         googlemap_buttom.setOnClickListener {

@@ -1,0 +1,63 @@
+{
+  "project_info": {
+    "project_number": "1075353727340",
+    "firebase_url": "https://workingsenior-5ac57.firebaseio.com",
+    "project_id": "workingsenior-5ac57",
+    "storage_bucket": "workingsenior-5ac57.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1075353727340:android:a2cbb741750e6230",
+        "android_client_info": {
+          "package_name": "com.example.pink.bleconnection"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1075353727340-pilt1dq1jvj2om3mah52vevnk4m30oh4.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.pink.bleconnection",
+            "certificate_hash": "20cb0a9183cedb74e71bdd6b2f0cbff3cab1fb20"
+          }
+        },
+        {
+          "client_id": "1075353727340-5pnvuuie6blrona1b7qp9eg98hl5vcj9.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.pink.bleconnection",
+            "certificate_hash": "b279aa45bff6e28a867e714a46930271f1b46ea0"
+          }
+        },
+        {
+          "client_id": "1075353727340-jvf4aqgo660u6ap1ruge58uph4os0791.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBRFGJ-tjo1O93VHBnTY5dlVzkpv0PSMHU"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1075353727340-jvf4aqgo660u6ap1ruge58uph4os0791.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
