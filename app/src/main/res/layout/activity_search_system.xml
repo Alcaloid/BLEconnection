@@ -8,40 +8,96 @@
     tools:context=".TestDatabase"
     android:id="@+id/serachBackground">
 
-    <Button
-        android:id="@+id/button_login"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Login" />
 
-    <TextView
-        android:id="@+id/text_your_que"
+    <LinearLayout
+        android:id="@+id/layout_mobile"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Your Que is" />
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-    <Button
-        android:id="@+id/button_queue"
+        <TextView
+            android:id="@+id/textmobilezone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="MobileZone" />
+
+        <Button
+            android:id="@+id/button_getque"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Get queue"
+            android:textAllCaps="false"/>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/text_your_que"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="Queue:" />
+
+            <TextView
+                android:id="@+id/text_show_yourque"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_weight="1"
+                android:text="none" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/text_currentque"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:text="Current:" />
+
+            <TextView
+                android:id="@+id/text_show_currentque"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:layout_weight="1"
+                android:text="none" />
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/layout_web"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Que" />
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/text_current_que"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Next_que" />
+        <TextView
+            android:id="@+id/textwebzone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="WebZone" />
 
-    <Button
-        android:id="@+id/button_next_que"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Next" />
+        <Button
+            android:id="@+id/button_next_que"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Next" />
 
-    <Button
-        android:id="@+id/button_restart"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Restart" />
+        <ListView
+            android:id="@+id/listview_user_inque"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
+    </LinearLayout>
 </LinearLayout>

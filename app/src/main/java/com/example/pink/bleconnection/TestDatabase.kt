@@ -13,21 +13,94 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DatabaseReference
 import com.google.firebase.firestore.*
 import kotlinx.android.synthetic.main.activity_search_system.*
 
 
 class TestDatabase : AppCompatActivity() {
+    //onMobile
     lateinit var dataBase: FirebaseFirestore
     lateinit var mAuth: FirebaseAuth
+    lateinit var callQueue : DocumentReference
+    lateinit var waitQueue : CollectionReference
     private var currentUser: FirebaseUser? = null
+    private var onQue : Boolean = false
+    private var userQuery : Int? = null
+    private var queWaiting : Int = 0
+    private var waitingQueHashMap : HashMap<String,Any> = HashMap()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_search_system)
-        mAuth = FirebaseAuth.getInstance()
+
+        init()
+        checkQueueUpdate()
+        moblieOperation()
+    }
+    fun init(){
+//        mAuth = FirebaseAuth.getInstance()
         dataBase = FirebaseFirestore.getInstance()
-        var inQue : Boolean = false
+        callQueue = dataBase.collection("CallQueue").document("Queue")
+        waitQueue = dataBase.collection("WaitingQueue")
+//        loginAnonymous()
+    }
+    fun checkQueueUpdate(){
+        //checkUpdate
+        callQueue.addSnapshotListener(EventListener<DocumentSnapshot>{snapshot,e->
+            if (e != null){
+                toast("Listen failed " + e)
+                return@EventListener
+            }
+            if (snapshot != null && snapshot.exists()) {
+                toast("Current data:"+snapshot.data)
+                if (onQue){
+                    if (snapshot.getDouble("QueueNumber")!!.toInt() == userQuery){
+                        showNotification("Test","It's Your Que")
+                        onQue = !onQue
+                    }
+                }else{
+                    userQuery = null
+                }
+            } else {
+                toast("Current data:null")
+            }
+        })
+    }
+    fun moblieOperation(){
+        button_getque.setOnClickListener {
+            if (onQue){
+               //cancle que
+                button_getque.text = "Get que"
+                waitingQueHashMap["State"] = "Cancle"
+                waitQueue.document(queWaiting.toString())
+                        .set(waitingQueHashMap)
+                text_show_yourque.text = "none"
+            }else{
+                //want que
+                button_getque.text = "Cancle que"
+                waitQueue.orderBy("QueueNumber",Query.Direction.DESCENDING)
+                        .limit(1)
+                        .get()
+                        .addOnCompleteListener(object : OnCompleteListener<QuerySnapshot>{
+                            override fun onComplete(task: Task<QuerySnapshot>) {
+                                if (task.isSuccessful){
+                                    for (document : DocumentSnapshot in task.result!!){
+                                        queWaiting = document.id.toInt()
+                                    }
+                                    queWaiting += 1
+                                    userQuery = queWaiting
+                                    waitingQueHashMap["QueueNumber"] = queWaiting
+                                    waitingQueHashMap["State"] = "Waiting"
+                                    waitQueue.document(queWaiting.toString())
+                                            .set(waitingQueHashMap)
+                                    text_show_yourque.text = userQuery.toString()
+                                }
+                            }
+                        })
+            }
+            onQue = !onQue
+        }
+    }
+        /*var inQue : Boolean = false
         var foundQueue : Int = 0
         var userSetQue : HashMap<String,String> = HashMap()
         var currentQue = 0
@@ -109,7 +182,7 @@ class TestDatabase : AppCompatActivity() {
             foundQueue = 0
             queHushMap["QueueNumber"] = 0
             docRef.set(queHushMap)
-        }
+        }*/
         /*var number = 0
         var currentQue = 0
         val queHushMap : HashMap<String,Int> = HashMap()
@@ -175,7 +248,7 @@ class TestDatabase : AppCompatActivity() {
             //db.set(tester)
         }*/
 
-    }
+
     fun showNotification(textTitle : String,textContent : String){
         val notificationManager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val builder = NotificationCompat.Builder(this, "1")
