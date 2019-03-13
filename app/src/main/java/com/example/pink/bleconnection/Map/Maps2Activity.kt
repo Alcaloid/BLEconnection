@@ -355,7 +355,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         }
 //        mMap.addPolyline(PolylineOptions().geodesic(true).add(myLocation).add(target))
     }
-    fun setPoint(){
+    /*fun setPoint(){
         addPoint(LatLng(3.75,2.75)  , arrayOf(1,3))
         addPoint(LatLng(7.5,2.75)   , arrayOf(0,2))
         addPoint(LatLng(11.25,2.75) , arrayOf(1,4))
@@ -371,7 +371,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         val point : PointOfLine = PointOfLine()
         point.PointOfLine(latLng,path)
         pointOfLine.add(point)
-    }
+    }*/
 
     fun startScanner(){
         mHandler?.postDelayed({

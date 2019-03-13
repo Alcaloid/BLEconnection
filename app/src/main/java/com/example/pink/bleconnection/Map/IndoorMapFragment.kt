@@ -24,6 +24,7 @@ import android.widget.ArrayAdapter
 import android.widget.Toast
 import com.example.pink.bleconnection.Model.PointOfLine
 import com.example.pink.bleconnection.Model.RoomDetail
+import com.example.pink.bleconnection.Model.RoomNameAdapter
 
 import com.example.pink.bleconnection.R
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -50,7 +51,9 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var mHandler: Handler
     private lateinit var scanSetting : ScanSettings
 
-    private var pointOfLine : ArrayList<PointOfLine> = arrayListOf()
+    private var pointOfLine : ArrayList<PointOfLine> = arrayListOf(
+
+    )
     private var roomDetail : ArrayList<RoomDetail> = arrayListOf(
             RoomDetail("1101:Lab", LatLng(63.0,2.0)) ,
             RoomDetail("1102:Graduation Common Room",LatLng(63.0,8.0)) ,
@@ -80,7 +83,6 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
     private var searchMarker : Marker? = null
     private var myLocation : LatLng? = null
     private var polyLine : Polyline? = null
-    private var placeName : ArrayList<String> = arrayListOf()
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_map, container, false)
@@ -121,7 +123,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(minZoom))
             }
         }
-        setPoint()
+        //setPoint()
         //Test
         myLocation = LatLng(9.0,18.0)
         switchMyLocal()
@@ -178,8 +180,8 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         }
     }
     fun searchOperation(context: Context){
-        val adapter = ArrayAdapter<String>(context, android.R.layout.simple_list_item_1, placeName)
-        mListPlaceName.setAdapter(adapter)
+        val roomAdapter : RoomNameAdapter = RoomNameAdapter(roomDetail,context)
+        mListPlaceName.setAdapter(roomAdapter)
         text_show_search.setOnClickListener {
             functionSearch("open")
         }
@@ -190,7 +192,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
             override fun afterTextChanged(p0: Editable?) {}
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int){}
             override fun onTextChanged(str: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                adapter.filter.filter(str)
+                roomAdapter.filter.filter(str)
             }
         })
         button_search.setOnClickListener {
@@ -200,7 +202,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
             functionSearch("close")
         }
         mListPlaceName.setOnItemClickListener { parent, view, position, id ->
-            editText_search_place_2.setText(adapter.getItem(position))
+            editText_search_place_2.setText(roomAdapter.getItem(position)!!.getRoomName())
         }
     }
     fun checkSearch(string: String,option:String){
@@ -345,7 +347,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    fun setPoint(){
+    /*fun setPoint(){
         addPoint(LatLng(0.0,0.0), arrayOf(0)) // i forgot array start 0 T-T
         //1-5
         addPoint(LatLng(7.0,18.0), arrayOf(2))
@@ -402,7 +404,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
 //        mMap.addMarker(MarkerOptions().position(latLng).title(latLng.toString()))
         point.PointOfLine(latLng,path)
         pointOfLine.add(point)
-    }
+    }*/
     fun toast(text : String){
         Toast.makeText(context,text, Toast.LENGTH_SHORT).show()
     }

@@ -8,6 +8,7 @@
         android:id="@+id/text_roomdetail_listview_1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="10dp"
-        android:text="TextView" />
+        android:layout_margin="10dp"
+        android:text="TextView"
+        android:textColor="@color/jet_black" />
 </LinearLayout>

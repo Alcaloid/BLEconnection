@@ -3,14 +3,14 @@ package com.example.pink.bleconnection.Model
 import com.google.android.gms.maps.model.LatLng
 import java.util.*
 
-class PointOfLine{
+class PointOfLine(position : LatLng,path : Array<Int>){
     private var local : LatLng = LatLng(0.0,0.0)
     private var nodePath : Array<Int> = arrayOf()
-
-    fun PointOfLine(position : LatLng,path : Array<Int>){
+    init {
         this.local = position
         this.nodePath = path
     }
+
     fun getLocal(): LatLng{
         return local
     }
