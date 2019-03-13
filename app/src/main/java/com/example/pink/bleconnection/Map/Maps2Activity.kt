@@ -42,7 +42,10 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     private var mHandler: Handler? = null
     lateinit var scanSetting : ScanSettings
     private var beaconDetail : ArrayList<ScanResultModel> = arrayListOf(
-            ScanResultModel(LatLng(0.0,0.0),-64)
+            ScanResultModel(LatLng(0.0,0.0),-64),
+            ScanResultModel(LatLng(15.0,0.0),-68),
+            ScanResultModel(LatLng(0.0,11.0),-68),
+            ScanResultModel(LatLng(15.0,11.0),-68)
     )
     private var dataDistance : Array<DoubleArray> = arrayOf(
             //0 is uuid and 1 is distance
@@ -167,7 +170,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         var average : Double = 0.0
         for (i in 0..beaconDetail.size-1){
             average = beaconDetail[i].getAverageSignal()
-            if (average != 0.0){
+            if (average > 0){
                 //can get signal one or more
                 //find distance
                 dataDistance[i][1] = calFunction.calDistanceFromRSSI(average,beaconDetail[i].getPower())
@@ -369,18 +372,6 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         point.PointOfLine(latLng,path)
         pointOfLine.add(point)
     }
-
-    /*fun setBeaconInformation(){
-        addBeaconDetail(LatLng(0.0,0.0),-64)
-        addBeaconDetail(LatLng(15.0,0.0),-68)
-        addBeaconDetail(LatLng(0.0,11.0),-68)
-        addBeaconDetail(LatLng(15.0,11.0),-68)
-    }
-    fun addBeaconDetail(position: LatLng,power:Int){
-        val detail : ScanResultModel = ScanResultModel()
-        detail.Detail(position, power)
-        beaconDetail.add(detail)
-    }*/
 
     fun startScanner(){
         mHandler?.postDelayed({
