@@ -51,7 +51,29 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var scanSetting : ScanSettings
 
     private var pointOfLine : ArrayList<PointOfLine> = arrayListOf()
-    private var roomDetail : ArrayList<RoomDetail> = arrayListOf()
+    private var roomDetail : ArrayList<RoomDetail> = arrayListOf(
+            RoomDetail("1101:Lab", LatLng(63.0,2.0)) ,
+            RoomDetail("1102:Graduation Common Room",LatLng(63.0,8.0)) ,
+            RoomDetail("Toilet Man(1)",LatLng(65.0,28.0)) ,
+            RoomDetail("Toilet Woman(1)",LatLng(61.0,28.0)) ,
+            RoomDetail("1111/1:iNeng Lab",LatLng(55.0,4.0)) ,
+            RoomDetail("1111/2:Lab",LatLng(55.0,10.0)) ,
+            RoomDetail("CPE 1112:Computer room1",LatLng(47.0,7.0)) ,
+            RoomDetail("CPE 1113:Computer room2",LatLng(39.0,7.0)) ,
+            RoomDetail("CPE 1114:Class room",LatLng(31.0,7.0)) ,
+            RoomDetail("CPE 1115:Class room",LatLng(23.0,7.0)) ,
+            RoomDetail("CPE 1116:Class room",LatLng(15.0,7.0)) ,
+            RoomDetail("CPE 1117:Lab",LatLng(55.0,25.0)) ,
+            RoomDetail("CPE 1118:Lab embedded",LatLng(47.0,25.0)) ,
+            RoomDetail("CPE 1119:Lab electronic",LatLng(39.0,25.0)) ,
+            RoomDetail("CPE 1120:Lab network",LatLng(31.0,25.0)) ,
+            RoomDetail("CPE 1121:Class room",LatLng(23.0,25.0)) ,
+            RoomDetail("CPE 1122:Server room&IT Admin",LatLng(15.0,25.0)) ,
+            RoomDetail("Toilet Woman(2)",LatLng(9.5,2.0)) ,
+            RoomDetail("Toilet Man(2)",LatLng(4.5,2.0)) ,
+            RoomDetail("1130:Cast Lab",LatLng(5.5,25.0)) ,
+            RoomDetail("1131:Cast Lab",LatLng(5.5,29.0))
+    )
 
     private var showMyLocation : Boolean = false
     private var showNavigation : Boolean = false
@@ -100,7 +122,6 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
             }
         }
         setPoint()
-        setRoomDetail()
         //Test
         myLocation = LatLng(9.0,18.0)
         switchMyLocal()
@@ -324,36 +345,6 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         }
     }
 
-    fun setRoomDetail(){
-        addRoomDetail("1101:Lab", LatLng(63.0,5.0))
-        addRoomDetail("1102:Graduation Common Room",LatLng(63.0,11.0))
-        addRoomDetail("Toilet Man(1)",LatLng(65.0,31.0))
-        addRoomDetail("Toilet Woman(1)",LatLng(61.0,31.0))
-        addRoomDetail("1111/1:iNeng Lab",LatLng(55.0,7.0))
-        addRoomDetail("1111/2:Lab",LatLng(55.0,13.0))
-        addRoomDetail("CPE 1112:Computer room1",LatLng(47.0,10.0))
-        addRoomDetail("CPE 1113:Computer room2",LatLng(39.0,10.0))
-        addRoomDetail("CPE 1114:Class room",LatLng(31.0,10.0))
-        addRoomDetail("CPE 1115:Class room",LatLng(23.0,10.0))
-        addRoomDetail("CPE 1116:Class room",LatLng(15.0,10.0))
-        addRoomDetail("CPE 1117:Lab",LatLng(55.0,28.0))
-        addRoomDetail("CPE 1118:Lab embedded",LatLng(47.0,28.0))
-        addRoomDetail("CPE 1119:Lab electronic",LatLng(39.0,28.0))
-        addRoomDetail("CPE 1120:Lab network",LatLng(31.0,28.0))
-        addRoomDetail("CPE 1121:Class room",LatLng(23.0,28.0))
-        addRoomDetail("CPE 1122:Server room&IT Admin",LatLng(15.0,28.0))
-        addRoomDetail("Toilet Woman(2)",LatLng(9.5,5.0))
-        addRoomDetail("Toilet Man(2)",LatLng(4.5,5.0))
-        addRoomDetail("1130:Cast Lab",LatLng(5.5,28.0))
-        addRoomDetail("1131:Cast Lab",LatLng(5.5,32.0))
-    }
-    fun addRoomDetail(name:String,position:LatLng){
-        val room : RoomDetail = RoomDetail()
-        room.RoomDetail(name,position)
-        placeName.add(name)
-        //mMap.addMarker(MarkerOptions().icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).position(position).title(name))
-        roomDetail.add(room)
-    }
     fun setPoint(){
         addPoint(LatLng(0.0,0.0), arrayOf(0)) // i forgot array start 0 T-T
         //1-5

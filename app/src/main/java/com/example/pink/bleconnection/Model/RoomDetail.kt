@@ -2,10 +2,10 @@ package com.example.pink.bleconnection.Model
 
 import com.google.android.gms.maps.model.LatLng
 
-class RoomDetail{
+class RoomDetail(name:String,position:LatLng){
     private var roomName : String = ""
     private var roomPosition : LatLng = LatLng(0.0,0.0)
-    fun RoomDetail(name:String,position:LatLng){
+    init {
         this.roomName = name
         this.roomPosition = position
     }
