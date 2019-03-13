@@ -22,7 +22,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.ArrayAdapter
-import com.example.pink.bleconnection.Model.BeaconDetail
+import com.example.pink.bleconnection.Model.ScanResultModel
 import com.example.pink.bleconnection.Model.CalculatorFunction
 import com.example.pink.bleconnection.Model.PointOfLine
 import com.karumi.dexter.Dexter
@@ -41,7 +41,9 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     private var mScanner : BluetoothLeScanner? = null
     private var mHandler: Handler? = null
     lateinit var scanSetting : ScanSettings
-    private var beaconDetail : ArrayList<BeaconDetail> = arrayListOf()
+    private var beaconDetail : ArrayList<ScanResultModel> = arrayListOf(
+            ScanResultModel(LatLng(0.0,0.0),-64)
+    )
     private var dataDistance : Array<DoubleArray> = arrayOf(
             //0 is uuid and 1 is distance
             doubleArrayOf(0.0,1000.0),
@@ -76,7 +78,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         button_background.setOnClickListener {
             calFunction.toast("Coming Soon",this@Maps2Activity)
         }
-        setBeaconInformation()
+        //setBeaconInformation()
         searchOperation()
         navigationOperation()
     }
@@ -368,17 +370,17 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         pointOfLine.add(point)
     }
 
-    fun setBeaconInformation(){
+    /*fun setBeaconInformation(){
         addBeaconDetail(LatLng(0.0,0.0),-64)
         addBeaconDetail(LatLng(15.0,0.0),-68)
         addBeaconDetail(LatLng(0.0,11.0),-68)
         addBeaconDetail(LatLng(15.0,11.0),-68)
     }
     fun addBeaconDetail(position: LatLng,power:Int){
-        val detail : BeaconDetail = BeaconDetail()
+        val detail : ScanResultModel = ScanResultModel()
         detail.Detail(position, power)
         beaconDetail.add(detail)
-    }
+    }*/
 
     fun startScanner(){
         mHandler?.postDelayed({
