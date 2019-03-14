@@ -50,34 +50,108 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var mScanner : BluetoothLeScanner
     private lateinit var mHandler: Handler
     private lateinit var scanSetting : ScanSettings
-
+    //point to mark line for navigation
     private var pointOfLine : ArrayList<PointOfLine> = arrayListOf(
-
+            //ref by point on pic point ver2
+            //0-4
+            PointOfLine(LatLng(7.0,15.0), arrayOf(1)),
+            PointOfLine(LatLng(9.0,15.0), arrayOf(0,2,8,13)),
+            PointOfLine(LatLng(9.0,9.0), arrayOf(1,3,4)),
+            PointOfLine(LatLng(9.0,2.0), arrayOf(2)),
+            PointOfLine(LatLng(8.0,9.0), arrayOf(2,5,6)),
+            //5-9
+            PointOfLine(LatLng(4.0,9.0), arrayOf(4,7)),
+            PointOfLine(LatLng(8.0,5.0), arrayOf(4)), //Toilet woman 2
+            PointOfLine(LatLng(4.0,5.0), arrayOf(5)),  //Toilet Man 2
+            PointOfLine(LatLng(9.0,25.0), arrayOf(1,9,10,11)),
+            PointOfLine(LatLng(9.0,28.0), arrayOf(8,12)),
+            //10-14
+            PointOfLine(LatLng(7.0,25.0), arrayOf(8)), //CPE 1130:Cast Lab
+            PointOfLine(LatLng(15.0,25.0), arrayOf(8)), //CPE 1122:Server room&IT Admin
+            PointOfLine(LatLng(7.0,28.0), arrayOf(9)), //CPE 1131:Cast Lab
+            PointOfLine(LatLng(15.0,15.0), arrayOf(1,14,21)),
+            PointOfLine(LatLng(26.0,15.0), arrayOf(13,15,22,27)),
+            //15-19
+            PointOfLine(LatLng(31.0,15.0), arrayOf(14,16,23,28)),
+            PointOfLine(LatLng(39.0,15.0), arrayOf(15,17,24,29)),
+            PointOfLine(LatLng(47.0,15.0), arrayOf(16,18,25,30)),
+            PointOfLine(LatLng(54.0,15.0), arrayOf(17,19,26,31)),
+            PointOfLine(LatLng(58.0,15.0), arrayOf(18,20,32,38)),
+            //20-24
+            PointOfLine(LatLng(63.0,15.0), arrayOf(19)),
+            PointOfLine(LatLng(15.0,8.0), arrayOf(13)), //CPE 1116:Class room
+            PointOfLine(LatLng(23.0,8.0), arrayOf(14)), //CPE 1115:Class room
+            PointOfLine(LatLng(31.0,8.0), arrayOf(15)), //CPE 1114:Class room
+            PointOfLine(LatLng(39.0,8.0), arrayOf(16)), //CPE 1113:Computer room2
+            //25-29
+            PointOfLine(LatLng(47.0,8.0), arrayOf(17)),  //CPE 1112:Computer room1
+            PointOfLine(LatLng(54.0,10.0), arrayOf(18)), //Lab 1111/2
+            PointOfLine(LatLng(23.0,25.0), arrayOf(14)), //CPE 1121:Class room
+            PointOfLine(LatLng(31.0,25.0), arrayOf(15)), //CPE 1120:Lab network
+            PointOfLine(LatLng(39.0,25.0), arrayOf(16)), //CPE 1119:Lab electronic
+            //30-34
+            PointOfLine(LatLng(47.0,25.0), arrayOf(17)), //CPE 1118:Lab embedded
+            PointOfLine(LatLng(54.0,25.0), arrayOf(18)), //CPE 1117:Lab
+            PointOfLine(LatLng(58.0,22.0), arrayOf(19,33,34)),
+            PointOfLine(LatLng(58.0,29.0), arrayOf(32)),
+            PointOfLine(LatLng(60.0,22.0), arrayOf(32,35,37)),
+            //35-39
+            PointOfLine(LatLng(66.0,22.0), arrayOf(34,36)),
+            PointOfLine(LatLng(66.0,25.0), arrayOf(35)), //Toilet man 1
+            PointOfLine(LatLng(60.0,25.0), arrayOf(34)), //Toilet woman 1
+            PointOfLine(LatLng(58.0,8.0), arrayOf(19,39,42)),
+            PointOfLine(LatLng(58.0,4.0), arrayOf(32,35,37)),
+            //40-42
+            PointOfLine(LatLng(60.0,22.0), arrayOf(32,35,37)),
+            PointOfLine(LatLng(60.0,22.0), arrayOf(32,35,37))
     )
+    //location room
     private var roomDetail : ArrayList<RoomDetail> = arrayListOf(
-            RoomDetail("1101:Lab", LatLng(63.0,2.0)) ,
-            RoomDetail("1102:Graduation Common Room",LatLng(63.0,8.0)) ,
-            RoomDetail("Toilet Man(1)",LatLng(65.0,28.0)) ,
-            RoomDetail("Toilet Woman(1)",LatLng(61.0,28.0)) ,
-            RoomDetail("1111/1:iNeng Lab",LatLng(55.0,4.0)) ,
-            RoomDetail("1111/2:Lab",LatLng(55.0,10.0)) ,
-            RoomDetail("CPE 1112:Computer room1",LatLng(47.0,7.0)) ,
-            RoomDetail("CPE 1113:Computer room2",LatLng(39.0,7.0)) ,
-            RoomDetail("CPE 1114:Class room",LatLng(31.0,7.0)) ,
-            RoomDetail("CPE 1115:Class room",LatLng(23.0,7.0)) ,
-            RoomDetail("CPE 1116:Class room",LatLng(15.0,7.0)) ,
-            RoomDetail("CPE 1117:Lab",LatLng(55.0,25.0)) ,
-            RoomDetail("CPE 1118:Lab embedded",LatLng(47.0,25.0)) ,
-            RoomDetail("CPE 1119:Lab electronic",LatLng(39.0,25.0)) ,
-            RoomDetail("CPE 1120:Lab network",LatLng(31.0,25.0)) ,
-            RoomDetail("CPE 1121:Class room",LatLng(23.0,25.0)) ,
-            RoomDetail("CPE 1122:Server room&IT Admin",LatLng(15.0,25.0)) ,
-            RoomDetail("Toilet Woman(2)",LatLng(9.5,2.0)) ,
-            RoomDetail("Toilet Man(2)",LatLng(4.5,2.0)) ,
-            RoomDetail("1130:Cast Lab",LatLng(5.5,25.0)) ,
-            RoomDetail("1131:Cast Lab",LatLng(5.5,29.0))
+            RoomDetail("CPE 1101:Lab", LatLng(66.0,3.0)) ,
+            RoomDetail("CPE 1102:Graduation Common Room",LatLng(66.0,7.0)) ,
+            RoomDetail("Toilet Man(1)",LatLng(67.5,25.0)) ,
+            RoomDetail("Toilet Woman(1)",LatLng(64.5,25.0)) ,
+            RoomDetail("CPE 1111/1:iNeng Lab",LatLng(60.0,4.0)) ,
+            RoomDetail("CPE 1111/2:Lab",LatLng(60.0,10.0)) ,
+            RoomDetail("CPE 1112:Computer room1",LatLng(55.0,7.0)) ,
+            RoomDetail("CPE 1113:Computer room2",LatLng(48.0,8.0)) ,
+            RoomDetail("CPE 1114:Class room",LatLng(40.0,8.0)) ,
+            RoomDetail("CPE 1115:Class room",LatLng(31.0,8.0)) ,
+            RoomDetail("CPE 1116:Class room",LatLng(22.0,8.0)) ,
+            RoomDetail("CPE 1117:Lab",LatLng(60.0,23.0)) ,
+            RoomDetail("CPE 1118:Lab embedded",LatLng(55.0,23.0)) ,
+            RoomDetail("CPE 1119:Lab electronic",LatLng(48.0,23.0)) ,
+            RoomDetail("CPE 1120:Lab network",LatLng(40.0,23.0)) ,
+            RoomDetail("CPE 1121:Class room",LatLng(31.0,23.0)) ,
+            RoomDetail("CPE 1122:Server room&IT Admin",LatLng(22.0,24.0)) ,
+            RoomDetail("Toilet Woman(2)",LatLng(13.0,5.0)) ,
+            RoomDetail("Toilet Man(2)",LatLng(6.0,5.0)) ,
+            RoomDetail("CPE 1130:Cast Lab",LatLng(9.0,24.0)) ,
+            RoomDetail("CPE 1131:Cast Lab",LatLng(9.0,28.0))
     )
-
+    private var roomNameArray : ArrayList<String> = arrayListOf(
+            "CPE 1101:Lab",
+            "CPE 1102:Graduation Common Room",
+            "CPE 1111/1:iNeng Lab",
+            "CPE 1111/2:Lab",
+            "CPE 1112:Computer room1",
+            "CPE 1113:Computer room2",
+            "CPE 1114:Class room",
+            "CPE 1115:Class room",
+            "CPE 1116:Class room",
+            "CPE 1117:Lab",
+            "CPE 1118:Lab embedded",
+            "CPE 1119:Lab electronic",
+            "CPE 1120:Lab network",
+            "CPE 1121:Class room",
+            "CPE 1122:Server room&IT Admin",
+            "CPE 1130:Cast Lab",
+            "CPE 1131:Cast Lab",
+            "Toilet Man(1)",
+            "Toilet Man(2)",
+            "Toilet Woman(1)",
+            "Toilet Woman(2)"
+    )
     private var showMyLocation : Boolean = false
     private var showNavigation : Boolean = false
     private var searchMarker : Marker? = null
@@ -100,13 +174,13 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         val testingRoom = LatLngBounds(
                 LatLng(0.0, 0.0),
-                LatLng(70.0,36.0))
+                LatLng(70.0,30.0))
         val mapGroundOverLay = GroundOverlayOptions()
-                .image(BitmapDescriptorFactory.fromResource(R.drawable.seniortesting))
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.floor11v2))
                 .positionFromBounds(testingRoom).zIndex(0f)
         val locationZoom = LatLng(7.5,5.5)
         val cameraTraget = LatLngBounds(
-                LatLng(-0.01,-0.01), LatLng(90.001, 90.001))
+                LatLng(-0.01,-0.01), LatLng(70.001, 30.001))
         mMap = googleMap
         mMap.mapType = GoogleMap.MAP_TYPE_NONE
         mMap.addGroundOverlay(mapGroundOverLay)
@@ -180,8 +254,9 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         }
     }
     fun searchOperation(context: Context){
-        val roomAdapter : RoomNameAdapter = RoomNameAdapter(roomDetail,context)
-        mListPlaceName.setAdapter(roomAdapter)
+        //val roomAdapter : RoomNameAdapter = RoomNameAdapter(roomDetail,context)
+        val adapter : ArrayAdapter<String> = ArrayAdapter(context,android.R.layout.simple_list_item_1,roomNameArray)
+        mListPlaceName.setAdapter(adapter)
         text_show_search.setOnClickListener {
             functionSearch("open")
         }
@@ -192,7 +267,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
             override fun afterTextChanged(p0: Editable?) {}
             override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int){}
             override fun onTextChanged(str: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                roomAdapter.filter.filter(str)
+                adapter.filter.filter(str)
             }
         })
         button_search.setOnClickListener {
@@ -202,7 +277,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
             functionSearch("close")
         }
         mListPlaceName.setOnItemClickListener { parent, view, position, id ->
-            editText_search_place_2.setText(roomAdapter.getItem(position)!!.getRoomName())
+            editText_search_place_2.setText(adapter.getItem(position))
         }
     }
     fun checkSearch(string: String,option:String){
