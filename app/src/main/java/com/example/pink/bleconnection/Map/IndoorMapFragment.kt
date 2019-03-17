@@ -154,7 +154,8 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         super.onViewCreated(view, savedInstanceState)
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapview) as SupportMapFragment
         mapFragment.getMapAsync(this)
-        searchViewOption(view.context)
+        setListViewAdapter(view.context)
+        searchViewOption()
         mBluetoothManager = activity?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = mBluetoothManager.adapter
         mHandler = Handler()
@@ -216,6 +217,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
                 search_font_2.visibility = View.GONE
                 search_back_2.visibility = View.VISIBLE
                 mListPlaceName.visibility = View.VISIBLE
+                editText_search_place_2.text.clear()
             }
             "search" -> {
                 searchBackground.setBackgroundColor(Color.TRANSPARENT)
@@ -256,32 +258,20 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
             }
         }
     }
-    fun searchViewOption(context: Context){
-        //val roomAdapter : RoomNameAdapter = RoomNameAdapter(roomDetail,context)
-        val adapter : ArrayAdapter<String> = ArrayAdapter(context,android.R.layout.simple_list_item_1,roomNameArray)
-        mListPlaceName.setAdapter(adapter)
+    fun searchViewOption(){
         text_show_search.setOnClickListener {
             functionSearch("open")
         }
         search_back_to_font.setOnClickListener {
             functionSearch("close")
         }
-        editText_search_place_2.addTextChangedListener(object : TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {}
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int){}
-            override fun onTextChanged(str: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                adapter.filter.filter(str)
-            }
-        })
         button_search.setOnClickListener {
             functionSearch("search")
         }
         button_search_delete_text.setOnClickListener {
             functionSearch("close")
         }
-        mListPlaceName.setOnItemClickListener { parent, view, position, id ->
-            editText_search_place_2.setText(adapter.getItem(position))
-        }
+
     }
     fun checkSearch(string: String,option:String){
         val buff = string.toLowerCase()
@@ -309,6 +299,31 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
             searchMarker = mMap.addMarker(MarkerOptions().position(roomPosition).icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE)).title(roomName))
         }
     }
+    fun setListViewAdapter(context: Context){
+        val adapter : ArrayAdapter<String> = ArrayAdapter(context,android.R.layout.simple_list_item_1,roomNameArray)
+        mListPlaceName.adapter = adapter
+        ListViewRoomName.adapter = adapter
+        editText_search_place_2.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int){}
+            override fun onTextChanged(str: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                adapter.filter.filter(str)
+            }
+        })
+        editText_navigation.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int){}
+            override fun onTextChanged(str: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                adapter.filter.filter(str)
+            }
+        })
+        ListViewRoomName.setOnItemClickListener { parent, view, position, id ->
+            editText_navigation.setText(adapter.getItem(position))
+        }
+        mListPlaceName.setOnItemClickListener { parent, view, position, id ->
+            editText_search_place_2.setText(adapter.getItem(position))
+        }
+    }
 
     fun switchMyLocal(){
         var near : Double = 100000.0
@@ -333,9 +348,11 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
     fun navigationViewOption(){
         button_navigation.setOnClickListener {
             if (myLocation != null){
+                searchBackground.setBackgroundColor(resources.getColor(R.color.angel_white))
                 navigation_background.visibility = View.VISIBLE
                 search_font_2.visibility = View.GONE
-                mListPlaceName.visibility = View.VISIBLE
+                ListViewRoomName.visibility = View.VISIBLE
+                editText_navigation.text.clear()
             }else{
                 toast("Cannot find user location")
             }
@@ -347,14 +364,14 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
             if (searchMarker!=null){
                 searchMarker?.remove()
             }
-            mListPlaceName.visibility = View.GONE
+            searchBackground.setBackgroundColor(Color.TRANSPARENT)
+            ListViewRoomName.visibility = View.GONE
             navigation_background.visibility = View.GONE
             search_font_2.visibility = View.VISIBLE
         }
         button_set_navigation.setOnClickListener {
-            mListPlaceName.visibility = View.GONE
-//            toast("Coming Soon")
-
+            ListViewRoomName.visibility = View.GONE
+            searchBackground.setBackgroundColor(Color.TRANSPARENT)
             val buff : String = editText_navigation.text.toString()
             checkSearch(buff,"Navigation")
         }
@@ -364,7 +381,6 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         var pathArray : ArrayList<LatLng> = arrayListOf()
         pathArray = burnFunction(target)
         for (i in pathArray){
-            println("Point of path is "+i)
             lineOption.add(i)
         }
         if (polyLine == null){
