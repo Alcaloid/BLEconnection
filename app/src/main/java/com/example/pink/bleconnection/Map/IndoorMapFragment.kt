@@ -367,66 +367,6 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
             println("Point of path is "+i)
             lineOption.add(i)
         }
-        /*var position : LatLng = myLocation!!
-        var currentPosition : Int = 0
-        var prePosition : Int? = null
-        val arrayPath : ArrayList<LatLng> = arrayListOf()
-        var pathOfPoint : Array<Int> = arrayOf()
-        var count : Int = 0
-        var rand : Int
-        var point : Int
-//        println("Start Position:"+position)
-        if (position == target) lineOption.add(position)
-        else{
-            while (position != target) {
-                println("Position:" + position)
-                arrayPath.add(position)
-                for (i in pointOfLine.indices) {
-                    if (position == pointOfLine[i].getLocal()) {
-                        pathOfPoint = pointOfLine[i].getPath()
-                        currentPosition = i
-                        break
-                    }
-                }
-                rand = Random().nextInt(pathOfPoint.size)
-                point = pathOfPoint[rand]
-                if (prePosition==null){
-                    position = pointOfLine[point].getLocal()
-                    prePosition = currentPosition
-                }else{
-                    count = 0
-                    while (point == prePosition){
-                        rand = Random().nextInt(pathOfPoint.size)
-                        point = pathOfPoint[rand]
-                        count += 1
-                        if (count == 10){
-                            break
-                        }
-                    }
-                    if (point != prePosition){
-                        position = pointOfLine[point].getLocal()
-                        prePosition = currentPosition
-                    }else break
-                    /*if (count == 10){
-                        position = myLocation!!
-                        arrayPath.clear()
-                    }else{
-                        position = pointOfLine[point].getLocal()
-                        prePosition = currentPosition
-                    }*/
-                }
-            }
-        }
-//        println("Array Size"+arrayPath.size)
-        if (arrayPath.size != 0){
-            for(i in arrayPath){
-//                println("path:"+i)
-                lineOption.add(i)
-            }
-        }
-        lineOption.add(target)*/
-        /*lineOption.add(myLocation)
-        lineOption.add(target)*/
         if (polyLine == null){
             polyLine = mMap.addPolyline(lineOption)
         }else{
@@ -444,6 +384,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         var pathWayChoice : Array<Int> = arrayOf()
         val pathWayDeadEnd : ArrayList<Int> = arrayListOf()
         var randomNumber : Int = 0 //default way is 0(in array XD)
+        var isNewRandom : Boolean = false
         var isDeadEnd : Boolean = false
         var count : Int = 0
 
@@ -454,25 +395,20 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
                 break
             }
         }
-        var breaker : Int = 0
-        while (currentPosition!=target&&breaker!=10){
+        while (currentPosition!=target){
             isDeadEnd = false
             //add current position
-            println("Data Add")
-            println("Current:"+currentPosition)
-            println("Point:"+currentPointPosition)
-            println("Previous:"+previousPointPosition)
-            myPath.add(currentPosition)
-            myPathWay.add(currentPointPosition!!)
+            if (!isNewRandom){
+                myPath.add(currentPosition)
+                myPathWay.add(currentPointPosition!!)
+            }
+            isNewRandom = false
             //get path way
-            pathWayChoice = pointOfLine[currentPointPosition].getPath() //if mylocation is set on point
+            pathWayChoice = pointOfLine[currentPointPosition!!].getPath() //if mylocation is set on point
             //random the way to walk
             randomNumber = Random().nextInt(pathWayChoice.size) //Random is random number on array ex.[10,20,30] random 0 not 10 it's 0
-            println("PathWayNum:"+pathWayChoice[randomNumber])
-            println("pointOfLine:"+pointOfLine[pathWayChoice[randomNumber]].getLocal())
             //if you start walk,walk it
             if (previousPointPosition==null){
-                println("Start Walk")
                 previousPointPosition = currentPointPosition
                 currentPointPosition = pathWayChoice[randomNumber]
                 currentPosition = pointOfLine[pathWayChoice[randomNumber]].getLocal()
@@ -504,11 +440,17 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
                             //pathWayDeadEnd.clear() //save size of array
                             pathWayDeadEnd.add(currentPointPosition)
                             //walk back
+                            //remove current position
+                            myPath.remove(currentPosition)
+                            myPathWay.remove(currentPointPosition)
+                            //Start walk back to previous point
                             currentPointPosition = previousPointPosition
                             currentPosition = pointOfLine[previousPointPosition].getLocal()
                             previousPointPosition = myPathWay[myPathWay.size-2]
-                            myPath.remove(currentPosition)
-                            myPathWay.remove(currentPointPosition)
+                            isNewRandom = true
+                        }else{
+                            //this path is dead end don't go~~~~
+                            isNewRandom = true
                         }
                     }else{
                         previousPointPosition = currentPointPosition
@@ -518,21 +460,18 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
                 }else if ((pathWayChoice[randomNumber]==previousPointPosition)&&(pathWayChoice.size==1)){
                     println("Dead End")
                     //If dead end go back
+                    myPath.remove(currentPosition)
+                    myPathWay.remove(currentPointPosition)
                     pathWayDeadEnd.add(currentPointPosition)
                     currentPointPosition = previousPointPosition
                     currentPosition = pointOfLine[previousPointPosition].getLocal()
                     previousPointPosition = myPathWay[myPathWay.size-2] //size-1 is current point
-                    //Protect add same position
-                    myPath.remove(currentPosition)
-                    myPathWay.remove(currentPointPosition)
+                    isNewRandom = true
+                }else{
+                    //new random
+                    isNewRandom = true
                 }
-                breaker += 1
-                /*if ((pathWayChoice[randomNumber]==previousPointPosition)&&(pathWayChoice.size==1)){
-                    //if dead end go back
-                    currentPointPosition = previousPointPosition
-                }*/
             }
-
         }
         //add target
         myPath.add(currentPosition)
