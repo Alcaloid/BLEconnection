@@ -21,9 +21,9 @@ class ScanResultModel(position : LatLng,power:Int){
         signal.clear()
     }
     fun getAverageSignal():Double{
-        if (signal.size!=0)return signal.average()
-        else return -1.0
-        /*var average : Double = 0.0
+        /*if (signal.size!=0)return signal.average()
+        else return -1.0*/
+        var average : Double = 0.0
         val size : Int = signal.size
         if (size != 0)
         {
@@ -32,7 +32,7 @@ class ScanResultModel(position : LatLng,power:Int){
         }
             average /= size
         }
-        return average*/
+        return average
     }
     fun getArraySize():Int{
         return this.signal.size

@@ -67,6 +67,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     var tmp : DoubleArray = doubleArrayOf()
     var count : Int = 0
     var focusMap : Boolean = false
+    private var uidFilter : ArrayList<ScanFilter> = arrayListOf()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -84,6 +85,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         //setBeaconInformation()
         searchOperation()
         navigationOperation()
+        addUUID()
     }
 
     /**
@@ -154,7 +156,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
     private var leScanCallBack = object : ScanCallback(){
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
-//            println("GetData->"+result.device.name+" Address:"+result.device.address)
+            println("GetData->"+result.device.name+" Address:"+result.device.address)
             if(result.device.name == "RL0"){
                 beaconDetail[0].addSignal(result.rssi)
             }else if (result.device.name == "RL1"){
@@ -170,13 +172,17 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         var average : Double = 0.0
         for (i in 0..beaconDetail.size-1){
             average = beaconDetail[i].getAverageSignal()
-            if (average > 0){
+            println("Average:"+average)
+            if (average != 0.0){
                 //can get signal one or more
                 //find distance
                 dataDistance[i][1] = calFunction.calDistanceFromRSSI(average,beaconDetail[i].getPower())
             }
         }
         distanceMinToMax()
+        for (i in dataDistance){
+            println("data is "+i[1])
+        }
         if ((dataDistance[0][1] != 1000.0)&&(dataDistance[1][1]!=1000.0)&&(dataDistance[2][1]!=1000.0)){
             markLocation(dataDistance[0][0].toInt(),dataDistance[1][0].toInt(),dataDistance[2][0].toInt(),
                     dataDistance[0][1],dataDistance[1][1],dataDistance[2][1])
@@ -208,7 +214,9 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         if (isMyLocation != null){
             isMyLocation?.remove()
         }
-        isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation!!).title(count.toString()))
+        println("MarkJa")
+        println("myLocal:"+myLocation)
+        isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation!!).title(count.toString()).zIndex(1f))
         count += 1
         setStartData()
     }
@@ -378,7 +386,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
             stopScanner()
             findMyLocation()
         },5000)
-        mScanner?.startScan(null,scanSetting,leScanCallBack)
+        mScanner?.startScan(uidFilter,scanSetting,leScanCallBack)
     }
     fun stopScanner(){
         mScanner?.stopScan(leScanCallBack)
@@ -391,5 +399,11 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         if (showMyLocation){
             mScanner?.stopScan(leScanCallBack)
         }
+    }
+    fun addUUID(){
+        uidFilter.add(ScanFilter.Builder().setDeviceAddress("DC:0B:D4:DF:34:7E").build())
+        uidFilter.add(ScanFilter.Builder().setDeviceAddress("D3:D8:8B:93:D5:D1").build())
+        uidFilter.add(ScanFilter.Builder().setDeviceAddress("E9:56:E4:39:C9:47").build())
+        uidFilter.add(ScanFilter.Builder().setDeviceAddress("CD:03:D7:B1:12:96").build())
     }
 }
