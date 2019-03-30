@@ -15,6 +15,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import com.dlazaro66.qrcodereaderview.QRCodeReaderView
+import com.google.firebase.firestore.CollectionReference
+import com.google.firebase.firestore.DocumentReference
+import com.google.firebase.firestore.DocumentSnapshot
+import com.google.firebase.firestore.EventListener
+import com.google.firebase.firestore.FirebaseFirestore
 import com.karumi.dexter.Dexter
 import com.karumi.dexter.PermissionToken
 import com.karumi.dexter.listener.PermissionDeniedResponse
@@ -24,7 +29,16 @@ import com.karumi.dexter.listener.single.PermissionListener
 import kotlinx.android.synthetic.main.fragment_que.*
 
 class QueFragment : Fragment(){
-    private var qrCodeReaderView: QRCodeReaderView? = null
+    lateinit var dataBase: FirebaseFirestore
+    lateinit var callQueue : DocumentReference
+    lateinit var waitQueue : CollectionReference
+    private var isQrQueue : Boolean = false
+    private var onQue : Boolean = false
+    private var myQueue : Int? = null
+    private var stringOfText : ArrayList<String> = arrayListOf()
+    private var buff : String = ""
+    private var stateQueueHashMap : HashMap<String,String> = HashMap()
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_que, container, false)
@@ -33,9 +47,17 @@ class QueFragment : Fragment(){
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        qrCodeReaderView = view.findViewById(R.id.qrdecoderview)
-        qrCodeReaderView?.setOnQRCodeReadListener { text, points -> toast("Text :"+text) }
-        qrCodeReaderView?.setQRDecodingEnabled(true)
+
+        init()
+        qrCodeScanner(view.context)
+        checkQueueUpdate(view.context)
+
+    }
+    fun init(){
+        dataBase = FirebaseFirestore.getInstance()
+        callQueue = dataBase.collection("CallQueue").document("Queue")
+        waitQueue = dataBase.collection("WaitingQueue")
+        //permissionCamera
         button_que_camera.setOnClickListener {
             Dexter.withActivity(activity)
                     .withPermission(Manifest.permission.CAMERA)
@@ -54,8 +76,82 @@ class QueFragment : Fragment(){
             layout_scan_qr.visibility = View.VISIBLE
             relative_que_camera_open.visibility = View.GONE
         }
+        button_leave_queue.setOnClickListener {
+            layout_scan_qr.visibility = View.VISIBLE
+            layout_getqueue.visibility = View.GONE
+            stateQueueHashMap["State"] = "LeaveQueue"
+            waitQueue.document(myQueue.toString())
+                    .set(stateQueueHashMap)
+        }
     }
-
+    fun qrCodeScanner(context: Context){
+        qrdecoderview.setQRDecodingEnabled(true)
+        //set funtion after scan
+        qrdecoderview.setOnQRCodeReadListener{text, points ->
+            stringOfText.clear()
+            buff = ""
+            text.forEachIndexed { index, c ->
+                if (c != ' '){
+                    buff += c
+                }else{
+                    stringOfText.add(buff)
+                    buff = ""
+                }
+            }
+            isQrQueue = checkQrcode(stringOfText[0])
+            if (isQrQueue && !onQue){
+                //is qrscan is our Queue code
+                //and user doesn't get que
+                if (stringOfText[1]=="Waiting"){
+                    //this queue not someone get
+                    onQue = true
+                    myQueue = stringOfText[1].toInt()
+                    stateQueueHashMap["State"] = "GetQueue"
+                    waitQueue.document(stringOfText[1])
+                            .set(stateQueueHashMap)
+                    layout_getqueue.visibility = View.VISIBLE
+                    relative_que_camera_open.visibility = View.GONE
+                    text_myqueue.text = myQueue.toString()
+                    showNotification("Notification", "Get queue",context)
+                }
+            }
+        }
+    }
+    fun checkQueueUpdate(context: Context){
+        var currentQueue : Int? = null
+        var waitingNumber : Int? = null
+        var waitingTime : Int? = null
+        //checkUpdate
+        callQueue.addSnapshotListener(EventListener<DocumentSnapshot>{ snapshot, e->
+            if (e != null){
+                toast("Listen failed " + e)
+                return@EventListener
+            }
+            if (snapshot != null && snapshot.exists()) {
+                //show data when user is onque
+                if (onQue) {
+                    currentQueue = snapshot.getDouble("QueueNumber")!!.toInt()
+                    waitingNumber = myQueue!! - currentQueue!!
+                    waitingTime = waitingNumber!!*10
+                    text_currentque.text = currentQueue.toString()
+                    text_que_waiting_number.text = waitingNumber.toString()
+                    text_que_waiting_time.text = waitingTime.toString()
+                    if (snapshot.getDouble("QueueNumber")!!.toInt() == myQueue) {
+                        showNotification("Test", "It's Your Que",context)
+                        onQue = !onQue
+                    }
+                }
+            } else {
+                toast("Current data:null")
+            }
+        })
+    }
+    fun checkQrcode(str : String):Boolean{
+        if (str == "xxx"){
+            return true
+        }
+        return false
+    }
     fun showNotification(textTitle : String,textContent : String,context: Context){
         val notificationManager = activity?.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         val builder = NotificationCompat.Builder(context, "1")

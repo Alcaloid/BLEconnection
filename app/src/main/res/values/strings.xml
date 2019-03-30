@@ -17,4 +17,5 @@
     <string name="wait">Wait</string>
     <string name="waiting_time">Wait around</string>
     <string name="not_queing"> ---- </string>
+    <string name="my_queue">Queue</string>
 </resources>

@@ -25,7 +25,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:gravity="top|center"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:visibility="visible">
 
                 <TextView
                     android:id="@+id/text_que_scan_qr"
@@ -44,6 +45,35 @@
                     android:scaleY="4"
                     app:srcCompat="@drawable/ic_add_a_photo_black_24dp" />
             </LinearLayout>
+
+            <RelativeLayout
+                android:id="@+id/layout_getqueue"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/text_myqueue"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center"
+                    android:text="Loading"
+                    android:textColor="@color/jet_black"
+                    android:textSize="30sp" />
+
+                <ImageButton
+                    android:id="@+id/button_leave_queue"
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:layout_alignParentStart="true"
+                    android:layout_alignParentTop="true"
+                    android:layout_marginStart="170dp"
+                    android:layout_marginTop="0dp"
+                    android:background="@android:color/transparent"
+                    android:scaleX="0.5"
+                    android:scaleY="0.5"
+                    app:srcCompat="@drawable/ic_close_black_48dp" />
+            </RelativeLayout>
 
             <RelativeLayout
                 android:id="@+id/relative_que_camera_open"
@@ -87,6 +117,7 @@
         android:orientation="horizontal">
 
         <TextView
+            android:id="@+id/text_currentque"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/round_text"

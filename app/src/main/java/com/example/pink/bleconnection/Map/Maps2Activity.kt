@@ -22,6 +22,7 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import com.example.pink.bleconnection.Model.ScanResultModel
 import com.example.pink.bleconnection.Model.CalculatorFunction
 import com.example.pink.bleconnection.Model.PointOfLine
@@ -157,6 +158,7 @@ class Maps2Activity : AppCompatActivity(), OnMapReadyCallback {
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             super.onScanResult(callbackType, result)
             println("GetData->"+result.device.name+" Address:"+result.device.address)
+            Toast.makeText(this@Maps2Activity,"GetData->"+result.device.name+" Address:"+result.device.address,Toast.LENGTH_SHORT).show()
             if(result.device.name == "RL0"){
                 beaconDetail[0].addSignal(result.rssi)
             }else if (result.device.name == "RL1"){
