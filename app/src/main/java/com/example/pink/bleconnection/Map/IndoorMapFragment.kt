@@ -156,9 +156,9 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
         setListViewAdapter(view.context)
         searchViewOption()
-        mBluetoothManager = activity?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        /*mBluetoothManager = activity?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
         mBluetoothAdapter = mBluetoothManager.adapter
-        mHandler = Handler()
+        mHandler = Handler()*/
     }
     override fun onMapReady(googleMap: GoogleMap) {
         val testingRoom = LatLngBounds(

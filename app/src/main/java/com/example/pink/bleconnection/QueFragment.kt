@@ -64,6 +64,7 @@ class QueFragment : Fragment(){
                     .withListener(object : PermissionListener{
                         override fun onPermissionGranted(response: PermissionGrantedResponse?) {
                             layout_scan_qr.visibility = View.GONE
+                            qrdecoderview.startCamera()
                             relative_que_camera_open.visibility = View.VISIBLE
                         }
                         override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest?, token: PermissionToken?) {}
@@ -75,10 +76,12 @@ class QueFragment : Fragment(){
         button_camera_closer.setOnClickListener {
             layout_scan_qr.visibility = View.VISIBLE
             relative_que_camera_open.visibility = View.GONE
+            qrdecoderview.stopCamera()
         }
         button_leave_queue.setOnClickListener {
             layout_scan_qr.visibility = View.VISIBLE
             layout_getqueue.visibility = View.GONE
+            onQue = false
             stateQueueHashMap["State"] = "LeaveQueue"
             waitQueue.document(myQueue.toString())
                     .set(stateQueueHashMap)
@@ -112,6 +115,7 @@ class QueFragment : Fragment(){
                     layout_getqueue.visibility = View.VISIBLE
                     relative_que_camera_open.visibility = View.GONE
                     text_myqueue.text = myQueue.toString()
+                    qrdecoderview.stopCamera()
                     showNotification("Notification", "Get queue",context)
                 }
             }
