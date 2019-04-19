@@ -37,7 +37,7 @@ class QueFragment : Fragment(){
     private var myQueue : Int? = null
     private var stringOfText : ArrayList<String> = arrayListOf()
     private var buff : String = ""
-    private var stateQueueHashMap : HashMap<String,String> = HashMap()
+    private var stateQueueHashMap : HashMap<String,Boolean> = HashMap()
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -69,7 +69,7 @@ class QueFragment : Fragment(){
                         }
                         override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest?, token: PermissionToken?) {}
                         override fun onPermissionDenied(response: PermissionDeniedResponse?) {
-                            toast("This canera use to get queuing")
+                            toast("This camera use to get queuing")
                         }
                     }).check()
         }
@@ -81,8 +81,9 @@ class QueFragment : Fragment(){
         button_leave_queue.setOnClickListener {
             layout_scan_qr.visibility = View.VISIBLE
             layout_getqueue.visibility = View.GONE
+            //Drop user queue
             onQue = false
-            stateQueueHashMap["State"] = "LeaveQueue"
+            stateQueueHashMap["Hold"] = false
             waitQueue.document(myQueue.toString())
                     .set(stateQueueHashMap)
         }
@@ -105,12 +106,13 @@ class QueFragment : Fragment(){
             if (isQrQueue && !onQue){
                 //is qrscan is our Queue code
                 //and user doesn't get que
-                if (stringOfText[1]=="Waiting"){
+                if (stringOfText[1]=="QueueNumber"){
                     //this queue not someone get
                     onQue = true
-                    myQueue = stringOfText[1].toInt()
-                    stateQueueHashMap["State"] = "GetQueue"
-                    waitQueue.document(stringOfText[1])
+                    myQueue = stringOfText[2].toInt()
+                    stateQueueHashMap["State"] = true
+                    stateQueueHashMap["Hold"] = true
+                    waitQueue.document(stringOfText[2])
                             .set(stateQueueHashMap)
                     layout_getqueue.visibility = View.VISIBLE
                     relative_que_camera_open.visibility = View.GONE
@@ -151,7 +153,7 @@ class QueFragment : Fragment(){
         })
     }
     fun checkQrcode(str : String):Boolean{
-        if (str == "xxx"){
+        if (str == "SenoirProJectCPE2019"){
             return true
         }
         return false
