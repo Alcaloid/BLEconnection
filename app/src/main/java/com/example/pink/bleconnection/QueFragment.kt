@@ -37,7 +37,7 @@ class QueFragment : Fragment(){
     private var myQueue : Int? = null
     private var stringOfText : ArrayList<String> = arrayListOf()
     private var buff : String = ""
-    private var stateQueueHashMap : HashMap<String,Boolean> = HashMap()
+    private var stateQueueHashMap : HashMap<String,Any?> = HashMap()
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -92,6 +92,7 @@ class QueFragment : Fragment(){
         qrdecoderview.setQRDecodingEnabled(true)
         //set funtion after scan
         qrdecoderview.setOnQRCodeReadListener{text, points ->
+            println("Data:"+text)
             stringOfText.clear()
             buff = ""
             text.forEachIndexed { index, c ->
@@ -102,24 +103,39 @@ class QueFragment : Fragment(){
                     buff = ""
                 }
             }
+            //stringOfText.forEach {i-> println("Data:"+i) }
             isQrQueue = checkQrcode(stringOfText[0])
             if (isQrQueue && !onQue){
                 //is qrscan is our Queue code
                 //and user doesn't get que
-                if (stringOfText[1]=="QueueNumber"){
-                    //this queue not someone get
-                    onQue = true
-                    myQueue = stringOfText[2].toInt()
-                    stateQueueHashMap["State"] = true
-                    stateQueueHashMap["Hold"] = true
-                    waitQueue.document(stringOfText[2])
-                            .set(stateQueueHashMap)
-                    layout_getqueue.visibility = View.VISIBLE
-                    relative_que_camera_open.visibility = View.GONE
-                    text_myqueue.text = myQueue.toString()
-                    qrdecoderview.stopCamera()
-                    showNotification("Notification", "Get queue",context)
-                }
+                waitQueue.document(stringOfText[2]).get()
+                        .addOnSuccessListener { document ->
+                            if (document != null) {
+                                //see this queue is not one get
+                                val isQue:Boolean = document.get("State") as Boolean
+                                if (isQue){
+                                    onQue = true
+                                    myQueue = stringOfText[2].toInt()
+                                    stateQueueHashMap["QueueNumber"] = myQueue
+                                    stateQueueHashMap["State"] = true
+                                    stateQueueHashMap["Hold"] = true
+                                    waitQueue.document(stringOfText[2])
+                                            .set(stateQueueHashMap)
+                                    layout_getqueue.visibility = View.VISIBLE
+                                    relative_que_camera_open.visibility = View.GONE
+                                    text_myqueue.text = myQueue.toString()
+                                    qrdecoderview.stopCamera()
+                                    showNotification("Notification", "Get queue",context)
+                                }else{
+                                    toast("This queue is someone get")
+                                }
+                            } else {
+                                toast("Queue Error")
+                            }
+                        }
+                        .addOnFailureListener { exception ->
+                            toast("Device can't get queue with:"+exception)
+                        }
             }
         }
     }

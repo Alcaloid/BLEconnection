@@ -1,196 +1,206 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
+        android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <android.support.v7.widget.CardView
-            android:id="@+id/cardview_queue"
-            android:layout_width="200dp"
-            android:layout_height="200dp"
-            android:layout_margin="30dp"
-            app:cardCornerRadius="5dp"
-            app:cardElevation="3dp">
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="vertical">
 
-            <LinearLayout
-                android:id="@+id/layout_scan_qr"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="top|center"
-                android:orientation="vertical"
-                android:visibility="visible">
+            <android.support.v7.widget.CardView
+                android:id="@+id/cardview_queue"
+                android:layout_width="200dp"
+                android:layout_height="200dp"
+                android:layout_margin="30dp"
+                app:cardCornerRadius="5dp"
+                app:cardElevation="3dp">
 
-                <TextView
-                    android:id="@+id/text_que_scan_qr"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:text="@string/scan_qr"
-                    android:textColor="@color/red" />
-
-                <ImageButton
-                    android:id="@+id/button_que_camera"
+                <LinearLayout
+                    android:id="@+id/layout_scan_qr"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@android:color/transparent"
-                    android:scaleX="4"
-                    android:scaleY="4"
-                    app:srcCompat="@drawable/ic_add_a_photo_black_24dp" />
-            </LinearLayout>
+                    android:gravity="top|center"
+                    android:orientation="vertical"
+                    android:visibility="visible">
 
-            <RelativeLayout
-                android:id="@+id/layout_getqueue"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone">
+                    <TextView
+                        android:id="@+id/text_que_scan_qr"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center"
+                        android:text="@string/scan_qr"
+                        android:textColor="@color/red" />
 
-                <TextView
-                    android:id="@+id/text_myqueue"
+                    <ImageButton
+                        android:id="@+id/button_que_camera"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/transparent"
+                        android:scaleX="4"
+                        android:scaleY="4"
+                        app:srcCompat="@drawable/ic_add_a_photo_black_24dp" />
+                </LinearLayout>
+
+                <RelativeLayout
+                    android:id="@+id/layout_getqueue"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:gravity="center"
-                    android:text="Loading"
-                    android:textColor="@color/jet_black"
-                    android:textSize="30sp" />
+                    android:visibility="gone">
 
-                <ImageButton
-                    android:id="@+id/button_leave_queue"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignParentTop="true"
-                    android:layout_marginStart="170dp"
-                    android:layout_marginTop="0dp"
-                    android:background="@android:color/transparent"
-                    android:scaleX="0.5"
-                    android:scaleY="0.5"
-                    app:srcCompat="@drawable/ic_close_black_48dp" />
-            </RelativeLayout>
+                    <TextView
+                        android:id="@+id/text_myqueue"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:gravity="center"
+                        android:text="-"
+                        android:textColor="@color/jet_black"
+                        android:textSize="100sp" />
 
-            <RelativeLayout
-                android:id="@+id/relative_que_camera_open"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:visibility="gone">
+                    <ImageButton
+                        android:id="@+id/button_leave_queue"
+                        android:layout_width="30dp"
+                        android:layout_height="30dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"
+                        android:layout_marginStart="170dp"
+                        android:layout_marginTop="0dp"
+                        android:background="@android:color/transparent"
+                        android:scaleX="0.5"
+                        android:scaleY="0.5"
+                        app:srcCompat="@drawable/ic_close_black_48dp" />
+                </RelativeLayout>
 
-                <com.dlazaro66.qrcodereaderview.QRCodeReaderView
-                    android:id="@+id/qrdecoderview"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:visibility="visible" />
-
-                <ImageButton
-                    android:id="@+id/button_camera_closer"
-                    android:layout_width="30dp"
-                    android:layout_height="30dp"
-                    android:layout_alignParentStart="true"
-                    android:layout_alignParentTop="true"
-                    android:background="@android:color/transparent"
-                    app:srcCompat="@drawable/ic_close_white_24dp" />
-
-            </RelativeLayout>
-
-        </android.support.v7.widget.CardView>
-    </LinearLayout>
-
-    <TextView
-        android:id="@+id/text_que_current"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:text="@string/current_que"
-        android:textColor="@color/common_google_signin_btn_text_dark_focused"
-        android:textSize="20sp" />
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal">
+            </android.support.v7.widget.CardView>
+        </LinearLayout>
 
         <TextView
-            android:id="@+id/text_currentque"
-            android:layout_width="wrap_content"
+            android:id="@+id/text_que_current"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@drawable/round_text"
             android:gravity="center"
-            android:text="@string/not_queing"
-            android:textColor="@color/angel_white"
-            android:textSize="30sp" />
+            android:text="@string/current_que"
+            android:textColor="@color/common_google_signin_btn_text_dark_focused"
+            android:textSize="20sp" />
+
+        <LinearLayout
+            android:id="@+id/linearlayout_current_queue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:padding="10dp">
+
+            <TextView
+                android:id="@+id/text_currentque"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/round_text"
+                android:gravity="center"
+                android:text="@string/not_queing"
+                android:textColor="@color/angel_white"
+                android:textSize="30sp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/linearlatouy_time_queue"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/text_que_waiting_number"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:drawableLeft="@drawable/ic_chevron_left_black_24dp"
+                    android:drawableRight="@drawable/ic_chevron_right_black_24dp"
+                    android:gravity="center"
+                    android:text="@string/not_queing"
+                    android:textColor="@color/jet_black"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/text_que_wait"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/wait"
+                    android:textColor="@color/jet_black"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginLeft="100dp"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/text_que_waiting_time"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:drawableLeft="@drawable/ic_chevron_left_black_24dp"
+                    android:drawableRight="@drawable/ic_chevron_right_black_24dp"
+                    android:gravity="center"
+                    android:text="@string/not_queing"
+                    android:textColor="@color/jet_black"
+                    android:textSize="20sp" />
+
+                <TextView
+                    android:id="@+id/text_que_waiting_around"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="center"
+                    android:text="@string/waiting_time"
+                    android:textColor="@color/jet_black"
+                    android:textSize="15sp" />
+            </LinearLayout>
+        </LinearLayout>
+
     </LinearLayout>
 
-    <LinearLayout
+    <RelativeLayout
+        android:id="@+id/relative_que_camera_open"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal">
+        android:layout_height="match_parent"
+        android:visibility="gone">
 
-        <LinearLayout
-            android:layout_width="wrap_content"
+        <com.dlazaro66.qrcodereaderview.QRCodeReaderView
+            android:id="@+id/qrdecoderview"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:gravity="center"
-            android:orientation="vertical">
+            android:visibility="visible" />
 
-            <TextView
-                android:id="@+id/text_que_waiting_number"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:drawableLeft="@drawable/ic_chevron_left_black_24dp"
-                android:drawableRight="@drawable/ic_chevron_right_black_24dp"
-                android:gravity="center"
-                android:text="@string/not_queing"
-                android:textColor="@color/jet_black"
-                android:textSize="20sp" />
+        <ImageButton
+            android:id="@+id/button_camera_closer"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignParentTop="true"
+            android:background="@android:color/transparent"
+            app:srcCompat="@drawable/ic_close_white_24dp" />
 
-            <TextView
-                android:id="@+id/text_que_wait"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="@string/wait"
-                android:textColor="@color/jet_black"
-                android:textSize="15sp" />
-        </LinearLayout>
+    </RelativeLayout>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout_marginLeft="100dp"
-            android:gravity="center"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/text_que_waiting_time"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:drawableLeft="@drawable/ic_chevron_left_black_24dp"
-                android:drawableRight="@drawable/ic_chevron_right_black_24dp"
-                android:gravity="center"
-                android:text="@string/not_queing"
-                android:textColor="@color/jet_black"
-                android:textSize="20sp" />
-
-            <TextView
-                android:id="@+id/text_que_waiting_around"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:gravity="center"
-                android:text="@string/waiting_time"
-                android:textColor="@color/jet_black"
-                android:textSize="15sp" />
-        </LinearLayout>
-    </LinearLayout>
-
-</LinearLayout>
+</RelativeLayout>
