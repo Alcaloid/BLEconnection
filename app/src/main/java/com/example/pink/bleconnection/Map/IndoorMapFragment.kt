@@ -1,13 +1,16 @@
 package com.example.pink.bleconnection.Map
 
+import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager
-import android.bluetooth.le.BluetoothLeScanner
-import android.bluetooth.le.ScanSettings
+import android.bluetooth.le.*
 import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Bundle
 import android.os.Handler
+import android.os.ParcelUuid
 import android.support.v4.app.Fragment
 import android.text.Editable
 import android.text.TextWatcher
@@ -16,8 +19,10 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import com.example.pink.bleconnection.Model.CalculatorFunction
 import com.example.pink.bleconnection.Model.PointOfLine
 import com.example.pink.bleconnection.Model.RoomDetail
+import com.example.pink.bleconnection.Model.ScanResultModel
 
 import com.example.pink.bleconnection.R
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -25,6 +30,12 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.*
+import com.karumi.dexter.Dexter
+import com.karumi.dexter.PermissionToken
+import com.karumi.dexter.listener.PermissionDeniedResponse
+import com.karumi.dexter.listener.PermissionGrantedResponse
+import com.karumi.dexter.listener.PermissionRequest
+import com.karumi.dexter.listener.single.PermissionListener
 import kotlinx.android.synthetic.main.fragment_map.*
 import java.util.*
 import kotlin.collections.ArrayList
@@ -37,6 +48,22 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
     private lateinit var mScanner : BluetoothLeScanner
     private lateinit var mHandler: Handler
     private lateinit var scanSetting : ScanSettings
+    private var lastLocation : LatLng = LatLng(-1000.0,-1000.0)
+    private var scanResult : ArrayList<ScanResultModel> = arrayListOf(
+            ScanResultModel("RL0",LatLng(13.2,0.09),-70.0),
+            ScanResultModel("RL1",LatLng(13.2,8.0),-70.0),
+            ScanResultModel("RL2",LatLng(3.8,8.0),-70.0),
+            ScanResultModel("RL3",LatLng(13.2,19.2),-70.0),
+            ScanResultModel("RL4",LatLng(13.2,33.8),-70.0),
+            ScanResultModel("RL5",LatLng(22.25,14.76),-70.0),
+            ScanResultModel("RL6",LatLng(30.8,19.2),-70.0),
+            ScanResultModel("RL7",LatLng(38.7,14.76),-70.0),
+            ScanResultModel("RL8",LatLng(44.7,19.2),-70.0),
+            ScanResultModel("RL9",LatLng(52.0,14.76),-70.0)
+    )
+    private var isMyLocation : Marker? = null
+    private var calFunction : CalculatorFunction = CalculatorFunction()
+    private var uidFilter : ArrayList<ScanFilter> = arrayListOf()
     //point to mark line for navigation
     private var pointOfLine : ArrayList<PointOfLine> = arrayListOf(
             //ref by point on pic point ver2
@@ -156,16 +183,14 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
         setListViewAdapter(view.context)
         searchViewOption()
-        /*mBluetoothManager = activity?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
-        mBluetoothAdapter = mBluetoothManager.adapter
-        mHandler = Handler()*/
+        setMapFunction()
     }
     override fun onMapReady(googleMap: GoogleMap) {
         val testingRoom = LatLngBounds(
                 LatLng(0.0, 0.0),
                 LatLng(70.0,30.0))
         val mapGroundOverLay = GroundOverlayOptions()
-                .image(BitmapDescriptorFactory.fromResource(R.drawable.floor11v2))
+                .image(BitmapDescriptorFactory.fromResource(R.drawable.floor11))
                 .positionFromBounds(testingRoom).zIndex(0f)
         val locationZoom = LatLng(7.5,5.5)
         val cameraTraget = LatLngBounds(
@@ -186,18 +211,19 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
                 mMap.animateCamera(CameraUpdateFactory.zoomTo(minZoom))
             }
         }
-        mMap.setOnMapClickListener (object : GoogleMap.OnMapClickListener{
+
+        /*mMap.setOnMapClickListener (object : GoogleMap.OnMapClickListener{
             override fun onMapClick(latLng: LatLng?) {
                 toast("LagLng is "+latLng)
                 println("LagLng:"+latLng)
             }
 
-        })
+        })*/
         //setPoint()
         //Test
-        myLocation = LatLng(9.0,18.0)
+        /*myLocation = LatLng(9.0,18.0)
         switchMyLocal()
-        mMap.addMarker(MarkerOptions().position(myLocation!!).title("MyLocal"))
+        mMap.addMarker(MarkerOptions().position(myLocation!!).title("MyLocal"))*/
         navigationViewOption()
     }
     //Test Point
@@ -207,6 +233,13 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
             mMap.addMarker(MarkerOptions().position(i.getLocal()).title(count.toString()))
             count += 1
         }
+    }
+    fun setMapFunction(){
+        mBluetoothManager = activity?.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
+        mBluetoothAdapter = mBluetoothManager.adapter
+        mHandler = Handler()
+        uidFilter.add(ScanFilter.Builder().setServiceUuid(ParcelUuid.fromString("00001803-494c-4f47-4943-544543480000")).build())
+        settingAndCheckPermission()
     }
 
     fun functionSearch(oprea : String){
@@ -368,6 +401,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
             ListViewRoomName.visibility = View.GONE
             navigation_background.visibility = View.GONE
             search_font_2.visibility = View.VISIBLE
+            editText_navigation.text.clear()
         }
         button_set_navigation.setOnClickListener {
             ListViewRoomName.visibility = View.GONE
@@ -492,6 +526,137 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         //add target
         myPath.add(currentPosition)
         return myPath
+    }
+
+    private fun settingAndCheckPermission(){
+        if(activity?.packageManager!!.hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)){
+            mBluetoothAdapter.takeIf { !it.isEnabled }?.apply {
+                val enableBtIntent = Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE)
+                startActivityForResult(enableBtIntent, 1)
+            }
+            Dexter.withActivity(activity)
+                    .withPermission(Manifest.permission.ACCESS_COARSE_LOCATION)
+                    .withListener(object : PermissionListener {
+                        override fun onPermissionGranted(response: PermissionGrantedResponse?) {
+                            showMyLocation = true
+                            mScanner = mBluetoothAdapter.bluetoothLeScanner
+                            scanSetting = ScanSettings.Builder().setReportDelay(0).setScanMode(ScanSettings.CALLBACK_TYPE_FIRST_MATCH).build()
+                            startScanner()
+                        }
+                        override fun onPermissionDenied(response: PermissionDeniedResponse?) {
+                            toast("Navigator system need location permission")
+                        }
+                        override fun onPermissionRationaleShouldBeShown(permission: PermissionRequest, token: PermissionToken) {
+                            token.continuePermissionRequest()
+                        }
+                    }).check()
+        }else{
+            toast("This Device can't use navigator")
+        }
+    }
+    private var leScanCallBack = object : ScanCallback(){
+        override fun onScanResult(callbackType: Int, result: ScanResult) {
+            super.onScanResult(callbackType, result)
+//            println("GetData->"+result.device.name+" uuids:"+result.scanRecord.serviceUuids+ "RSSI: "+result.rssi)
+            if(result.device.name == "RL0")
+                scanResult[0].addSignal(result.rssi.toDouble())
+            else if (result.device.name == "RL1")
+                scanResult[1].addSignal(result.rssi.toDouble())
+            else if (result.device.name == "RL2")
+                scanResult[2].addSignal(result.rssi.toDouble())
+            else if (result.device.name == "RL3")
+                scanResult[3].addSignal(result.rssi.toDouble())
+            else if (result.device.name == "RL4")
+                scanResult[4].addSignal(result.rssi.toDouble())
+            else if (result.device.name == "RL5")
+                scanResult[5].addSignal(result.rssi.toDouble())
+            else if (result.device.name == "RL6")
+                scanResult[6].addSignal(result.rssi.toDouble())
+            else if (result.device.name == "RL7")
+                scanResult[7].addSignal(result.rssi.toDouble())
+            else if (result.device.name == "RL8")
+                scanResult[8].addSignal(result.rssi.toDouble())
+            else if (result.device.name == "RL9")
+                scanResult[9].addSignal(result.rssi.toDouble())
+        }
+    }
+
+    fun findMyLocation(bleData:ArrayList<ScanResultModel>){
+        val circles : ArrayList<ScanResultModel> = arrayListOf()
+        var location : LatLng = LatLng(0.0,0.0)
+        var countBuffer : Int = 0
+        //get value to calculate
+        for(i in bleData.size-1 downTo 0){
+            if (bleData[i].checkEmpty()) {
+                bleData[i].calDistanceFromRSSI()
+                circles.add(bleData[i])
+                countBuffer += 1
+                if (countBuffer==3){
+                    break
+                }
+            }
+        }
+        circles.map{ println("data : " + it.getUUID() + " " + it.getAvgSignal() ) }
+
+        if(circles.size == 3 && (circles[0].getAvgSignal() != 0.0 && circles[1].getAvgSignal() != 0.0 && circles[2].getAvgSignal() != 0.0)){
+            location = calFunction.trilateration(circles)
+            myLocation = calFunction.expoAverage(lastLocation,location)
+            println("Location = "+myLocation)
+            //val thisLocation = calFunction.expoAverage(lastLocation,location)
+            //lastLocation = thisLocation
+
+            /*println("location = "+location)
+            println("lastLocation = "+lastLocation)
+            println("thisLocation = "+thisLocation)*/
+            //marklocation
+            switchMyLocal()
+            scanResult.map{ it.clearSignal() }
+            markLocation(myLocation!!)
+        }
+        else{
+            println("lack of signal!!")
+            // add signal again
+        }
+
+        startScanner()
+    }
+    fun markLocation(myLocation : LatLng){
+        println("Mark")
+        if (isMyLocation != null){
+            isMyLocation?.remove()
+        }
+        isMyLocation = mMap.addMarker(MarkerOptions().position(myLocation))
+    }
+    fun sortScanResult(list:ArrayList<ScanResultModel>){
+
+        list.map{ it.filter() }
+        list.sortWith(compareBy({
+            it.getAvgSignal()
+        }))
+    }
+    fun startScanner(){
+        mHandler.postDelayed({
+            stopScanner()
+            println("done!!")
+            val bleData : ArrayList<ScanResultModel> = arrayListOf()
+            bleData.addAll(scanResult)
+            sortScanResult(bleData)
+            findMyLocation(bleData)
+            bleData.clear()
+        },10000)
+        mScanner.startScan(uidFilter,scanSetting,leScanCallBack)
+    }
+    fun stopScanner(){
+        mScanner.stopScan(leScanCallBack)
+        /*if (isMyLocation != null){
+            isMyLocation?.remove()
+        }*/
+    }
+    override fun onDestroy() {
+        super.onDestroy()
+        if (showMyLocation){
+            mScanner.stopScan(leScanCallBack)
+        }
     }
     fun toast(text : String){
         Toast.makeText(context,text, Toast.LENGTH_SHORT).show()
