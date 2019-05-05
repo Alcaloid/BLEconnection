@@ -126,7 +126,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
             RoomDetail("CPE 1102:Graduation Common Room",LatLng(66.0,7.0)) ,
             RoomDetail("Toilet Man(1)",LatLng(67.5,25.0)) ,
             RoomDetail("Toilet Woman(1)",LatLng(64.5,25.0)) ,
-            RoomDetail("CPE 1111/1:iNeng Lab",LatLng(60.0,4.0)) ,
+            RoomDetail("CPE 1111/1:iNeng Lab",LatLng(60.0,3.0)) ,
             RoomDetail("CPE 1111/2:Lab",LatLng(60.0,10.0)) ,
             RoomDetail("CPE 1112:Computer room1",LatLng(55.0,7.0)) ,
             RoomDetail("CPE 1113:Computer room2",LatLng(48.0,8.0)) ,
@@ -221,7 +221,7 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
         })*/
         //setPoint()
         //Test
-        /*myLocation = LatLng(9.0,18.0)
+        /*myLocation = LatLng(9.5,15.0)
         switchMyLocal()
         mMap.addMarker(MarkerOptions().position(myLocation!!).title("MyLocal"))*/
         navigationViewOption()
@@ -496,7 +496,11 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
                             //Start walk back to previous point
                             currentPointPosition = previousPointPosition
                             currentPosition = pointOfLine[previousPointPosition].getLocal()
-                            previousPointPosition = myPathWay[myPathWay.size-2]
+                            if (myPathWay.size>=2){
+                                previousPointPosition = myPathWay[myPathWay.size-2]
+                            }else{
+                                previousPointPosition = null
+                            }
                             isNewRandom = true
                         }else{
                             //this path is dead end don't go~~~~
@@ -515,7 +519,11 @@ class IndoorMapFragment : Fragment(), OnMapReadyCallback {
                     pathWayDeadEnd.add(currentPointPosition)
                     currentPointPosition = previousPointPosition
                     currentPosition = pointOfLine[previousPointPosition].getLocal()
-                    previousPointPosition = myPathWay[myPathWay.size-2] //size-1 is current point
+                    if (myPathWay.size>=2){
+                        previousPointPosition = myPathWay[myPathWay.size-2]//size-1 is current point
+                    }else{
+                        previousPointPosition = null
+                    }
                     isNewRandom = true
                 }else{
                     //new random
