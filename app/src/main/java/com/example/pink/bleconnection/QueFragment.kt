@@ -8,6 +8,7 @@ import android.content.Context
 import android.graphics.PointF
 import android.os.Build
 import android.os.Bundle
+import android.os.CountDownTimer
 import android.support.v4.app.Fragment
 import android.support.v4.app.NotificationCompat
 import android.view.LayoutInflater
@@ -27,6 +28,8 @@ import com.karumi.dexter.listener.PermissionGrantedResponse
 import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import kotlinx.android.synthetic.main.fragment_que.*
+import java.text.DecimalFormat
+import kotlin.concurrent.timer
 
 class QueFragment : Fragment(){
     lateinit var dataBase: FirebaseFirestore
@@ -38,7 +41,10 @@ class QueFragment : Fragment(){
     private var stringOfText : ArrayList<String> = arrayListOf()
     private var buff : String = ""
     private var stateQueueHashMap : HashMap<String,Any?> = HashMap()
-
+    var timer: CountDownTimer? = null
+    var currentQueue : Int? = null
+    var waitingNumber : Int? = null
+    var waitingTime : Int? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_que, container, false)
@@ -79,14 +85,22 @@ class QueFragment : Fragment(){
             qrdecoderview.stopCamera()
         }
         button_leave_queue.setOnClickListener {
-            layout_scan_qr.visibility = View.VISIBLE
-            layout_getqueue.visibility = View.GONE
             //Drop user queue
-            onQue = false
+            setStartPage()
             stateQueueHashMap["Hold"] = false
             waitQueue.document(myQueue.toString())
                     .set(stateQueueHashMap)
+            setStartPage()
         }
+    }
+    fun setStartPage(){
+        onQue = false
+        timer!!.cancel()
+        text_currentque.text = "-"
+        text_que_waiting_number.text = "-"
+        text_que_waiting_time.text = "00:00:00"
+        layout_scan_qr.visibility = View.VISIBLE
+        layout_getqueue.visibility = View.GONE
     }
     fun qrCodeScanner(context: Context){
         qrdecoderview.setQRDecodingEnabled(true)
@@ -113,7 +127,7 @@ class QueFragment : Fragment(){
                             if (document != null) {
                                 //see this queue is not one get
                                 val isQue:Boolean = document.get("State") as Boolean
-                                if (isQue){
+                                if (!isQue){
                                     onQue = true
                                     myQueue = stringOfText[2].toInt()
                                     stateQueueHashMap["QueueNumber"] = myQueue
@@ -125,6 +139,36 @@ class QueFragment : Fragment(){
                                     relative_que_camera_open.visibility = View.GONE
                                     text_myqueue.text = myQueue.toString()
                                     qrdecoderview.stopCamera()
+                                    callQueue.get().addOnSuccessListener { doc ->
+                                        if (doc != null) {
+                                            currentQueue = doc.getDouble("QueueNumber")!!.toInt()
+                                            waitingNumber = myQueue!! - currentQueue!!
+                                            text_currentque.text = currentQueue.toString()
+                                            text_que_waiting_number.text = waitingNumber.toString()
+                                            waitingTime = waitingNumber!!*600000
+                                            println("Waiting Time = "+waitingTime)
+                                            timer = object: CountDownTimer(waitingTime!!.toLong(),1000) {
+                                                override fun onTick(millisUntilFinished: Long) {
+                                                    val f = DecimalFormat("00")
+                                                    val hour = millisUntilFinished / 3600000 % 24
+                                                    val min = millisUntilFinished / 60000 % 60
+                                                    val sec = millisUntilFinished / 1000 % 60
+                                                    if (onQue){
+                                                        text_que_waiting_time.setText(f.format(hour) + ":" + f.format(min) + ":" + f.format(sec))
+                                                    }else{
+                                                        text_que_waiting_time.text = "--:--:--"
+                                                        timer!!.cancel()
+                                                    }
+                                                }
+                                                override fun onFinish() {
+                                                    text_que_waiting_time.setText("00:00:00")
+                                                }
+                                            }
+                                            timer!!.start()
+                                        }else{
+
+                                        }
+                                    }
                                     showNotification("Notification", "Get queue",context)
                                 }else{
                                     toast("This queue is someone get")
@@ -140,9 +184,6 @@ class QueFragment : Fragment(){
         }
     }
     fun checkQueueUpdate(context: Context){
-        var currentQueue : Int? = null
-        var waitingNumber : Int? = null
-        var waitingTime : Int? = null
         //checkUpdate
         callQueue.addSnapshotListener(EventListener<DocumentSnapshot>{ snapshot, e->
             if (e != null){
@@ -154,13 +195,13 @@ class QueFragment : Fragment(){
                 if (onQue) {
                     currentQueue = snapshot.getDouble("QueueNumber")!!.toInt()
                     waitingNumber = myQueue!! - currentQueue!!
-                    waitingTime = waitingNumber!!*10
+                    //waitingTime = waitingNumber!!*10
                     text_currentque.text = currentQueue.toString()
                     text_que_waiting_number.text = waitingNumber.toString()
-                    text_que_waiting_time.text = waitingTime.toString()
+                    //text_que_waiting_time.text = waitingTime.toString()
                     if (snapshot.getDouble("QueueNumber")!!.toInt() == myQueue) {
                         showNotification("Test", "It's Your Que",context)
-                        onQue = !onQue
+                        setStartPage()
                     }
                 }
             } else {
