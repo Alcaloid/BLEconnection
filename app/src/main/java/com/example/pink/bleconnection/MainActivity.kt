@@ -15,5 +15,9 @@ class MainActivity : AppCompatActivity() {
             intent = Intent(this,PlateActivity::class.java)
             startActivity(intent)
         }
+        button_test.setOnClickListener {
+            intent = Intent(this,TestPageActivity::class.java)
+            startActivity(intent)
+        }
     }
 }

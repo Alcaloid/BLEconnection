@@ -29,12 +29,14 @@ import com.karumi.dexter.listener.PermissionRequest
 import com.karumi.dexter.listener.single.PermissionListener
 import kotlinx.android.synthetic.main.fragment_que.*
 import java.text.DecimalFormat
+import java.util.*
 import kotlin.concurrent.timer
 
 class QueFragment : Fragment(){
     lateinit var dataBase: FirebaseFirestore
     lateinit var callQueue : DocumentReference
     lateinit var waitQueue : CollectionReference
+    lateinit var timeToWait : CollectionReference
     private var isQrQueue : Boolean = false
     private var onQue : Boolean = false
     private var myQueue : Int? = null
@@ -44,7 +46,13 @@ class QueFragment : Fragment(){
     var timer: CountDownTimer? = null
     var currentQueue : Int? = null
     var waitingNumber : Int? = null
-    var waitingTime : Int? = null
+    var averageTimeToWait : Long = 0
+    var waitingTime : Long? = null
+    var startTime : Long? = null //set when user get queue
+    var endTime : Long? = null //set when current queue = myQueue
+    val dateData = Calendar.getInstance()
+    var dateValue : Date? = null
+    val dummyTimeData = Date(119,4,7)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = inflater.inflate(R.layout.fragment_que, container, false)
@@ -63,6 +71,7 @@ class QueFragment : Fragment(){
         dataBase = FirebaseFirestore.getInstance()
         callQueue = dataBase.collection("CallQueue").document("Queue")
         waitQueue = dataBase.collection("WaitingQueue")
+        timeToWait = dataBase.collection("TimeZone")
         //permissionCamera
         button_que_camera.setOnClickListener {
             Dexter.withActivity(activity)
@@ -87,9 +96,7 @@ class QueFragment : Fragment(){
         button_leave_queue.setOnClickListener {
             //Drop user queue
             setStartPage()
-            stateQueueHashMap["Hold"] = false
-            waitQueue.document(myQueue.toString())
-                    .set(stateQueueHashMap)
+            changeStateHold()
             setStartPage()
         }
     }
@@ -139,35 +146,45 @@ class QueFragment : Fragment(){
                                     relative_que_camera_open.visibility = View.GONE
                                     text_myqueue.text = myQueue.toString()
                                     qrdecoderview.stopCamera()
+                                    dateValue = dateData.time
+                                    startTime = dateValue!!.time
                                     callQueue.get().addOnSuccessListener { doc ->
                                         if (doc != null) {
                                             currentQueue = doc.getDouble("QueueNumber")!!.toInt()
                                             waitingNumber = myQueue!! - currentQueue!!
                                             text_currentque.text = currentQueue.toString()
                                             text_que_waiting_number.text = waitingNumber.toString()
-                                            waitingTime = waitingNumber!!*600000
-                                            println("Waiting Time = "+waitingTime)
-                                            timer = object: CountDownTimer(waitingTime!!.toLong(),1000) {
-                                                override fun onTick(millisUntilFinished: Long) {
-                                                    val f = DecimalFormat("00")
-                                                    val hour = millisUntilFinished / 3600000 % 24
-                                                    val min = millisUntilFinished / 60000 % 60
-                                                    val sec = millisUntilFinished / 1000 % 60
-                                                    if (onQue){
-                                                        text_que_waiting_time.setText(f.format(hour) + ":" + f.format(min) + ":" + f.format(sec))
-                                                    }else{
-                                                        text_que_waiting_time.text = "--:--:--"
-                                                        timer!!.cancel()
-                                                    }
-                                                }
-                                                override fun onFinish() {
-                                                    text_que_waiting_time.setText("00:00:00")
-                                                }
-                                            }
-                                            timer!!.start()
                                         }else{
-
+                                            toast("Can't get CallQueue Data")
                                         }
+                                    }
+                                    //query dummy time data by zone > 6 May 2019 , < 8 May 2019
+                                    timeToWait  .whereGreaterThan("Date",Date(119,4,6))
+                                                .whereLessThan("Date",Date(119,4,8))
+                                                .get()
+                                                .addOnSuccessListener {
+                                                    for (dataTime in it){
+                                                        averageTimeToWait += dataTime.data.get("WaitingTime") as Long
+                                                    }
+                                                    averageTimeToWait = averageTimeToWait.div(it.size())
+                                                    waitingTime = waitingNumber!!*averageTimeToWait
+                                                    timer = object: CountDownTimer(waitingTime!!.toLong(),1000) {
+                                                        override fun onTick(millisUntilFinished: Long) {
+                                                            val f = DecimalFormat("00")
+                                                            val hour = millisUntilFinished / 3600000 % 24
+                                                            val min = millisUntilFinished / 60000 % 60
+                                                            val sec = millisUntilFinished / 1000 % 60
+                                                            if (onQue){
+                                                                text_que_waiting_time.setText(f.format(hour) + ":" + f.format(min) + ":" + f.format(sec))
+                                                            }else{
+                                                                text_que_waiting_time.text = "--:--:--"
+                                                                timer!!.cancel()
+                                                            }
+                                                        }
+                                                        override fun onFinish() {
+                                                            text_que_waiting_time.setText("00:00:00")
+                                                        }
+                                                    }.start()
                                     }
                                     showNotification("Notification", "Get queue",context)
                                 }else{
@@ -199,8 +216,17 @@ class QueFragment : Fragment(){
                     text_currentque.text = currentQueue.toString()
                     text_que_waiting_number.text = waitingNumber.toString()
                     //text_que_waiting_time.text = waitingTime.toString()
+                    //if current queue near myqueue it's noti user
+                    if ((snapshot.getDouble("QueueNumber")!!.toInt() >= myQueue!!-5)&&(snapshot.getDouble("QueueNumber")!!.toInt() < myQueue!!)) {
+                        if(snapshot.getDouble("QueueNumber")!!.toInt() == myQueue!!-1){
+                            showNotification("Alert", "Next queue is your queue",context)
+                        }else{
+                            showNotification("Alert", "Close to your queue",context)
+                        }
+                    }
                     if (snapshot.getDouble("QueueNumber")!!.toInt() == myQueue) {
                         showNotification("Test", "It's Your Que",context)
+                        setDataOnMyQueue()
                         setStartPage()
                     }
                 }
@@ -208,6 +234,21 @@ class QueFragment : Fragment(){
                 toast("Current data:null")
             }
         })
+    }
+    fun changeStateHold(){
+        stateQueueHashMap["Hold"] = false
+        waitQueue.document(myQueue.toString())
+                .set(stateQueueHashMap)
+    }
+    fun setDataOnMyQueue(){
+        //set data Hold on WaitingQueue collection to false
+        changeStateHold()
+        //sent data to TimeStamp
+        endTime = dateValue!!.time
+        val result = endTime!! - startTime!!
+        stateQueueHashMap["Date"] = dateValue
+        stateQueueHashMap["WaitingTime"] = result
+        timeToWait.document().set(stateQueueHashMap)
     }
     fun checkQrcode(str : String):Boolean{
         if (str == "SenoirProJectCPE2019"){

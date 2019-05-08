@@ -12,9 +12,9 @@
         android:textAllCaps="false"/>
 
     <Button
-        android:id="@+id/button_clock"
+        android:id="@+id/button_test"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Go to clock"
-        android:textAllCaps="false"/>
+        android:text="Go to test page"
+        android:textAllCaps="false" />
 </LinearLayout>

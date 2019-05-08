@@ -48,6 +48,7 @@
             android:label="@string/title_activity_maps2"
             android:screenOrientation="portrait" />
         <activity android:name=".PlateActivity" />
+        <activity android:name=".TestPageActivity"></activity>
     </application>
 
 </manifest>
